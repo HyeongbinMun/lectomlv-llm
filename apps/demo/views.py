@@ -42,7 +42,7 @@ class DemoView(TemplateView):
             body["lecture_id"] = int(lecture_id)
 
         try:
-            api_url = request.build_absolute_uri("/api/llm/query/")
+            api_url = "http://127.0.0.1:8000/api/llm/query/"
             res = requests.post(api_url, json=body, timeout=10)
             data = res.json()
             if res.ok:
@@ -50,6 +50,8 @@ class DemoView(TemplateView):
                 ctx["active_tab"] = "query"
             else:
                 ctx["form_error"] = f"API 오류: {data}"
+        except requests.exceptions.JSONDecodeError:
+            ctx["form_error"] = f"API 응답 파싱 실패 (status={res.status_code})"
         except Exception as e:
             ctx["form_error"] = f"요청 실패: {e}"
 

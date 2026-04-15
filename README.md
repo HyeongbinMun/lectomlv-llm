@@ -14,7 +14,7 @@
 - **외부 JSON 자동 변환** — PPTX 슬라이드·영상 자막 등 다양한 형식 자동 감지 및 임포트
 - **비동기 처리** — Celery Worker가 LLM 추론과 벡터 인덱싱을 백그라운드 수행
 - **데모 대시보드** — 브라우저에서 바로 쿼리·업로드·결과 확인 가능
-- **중복 모델 지원** — Qwen / Gemma 등 여러 LLM을 동시에 비교 가능
+- **모델 확장 가능** — Ollama 지원 모델을 설정만으로 추가 가능
 
 ## 아키텍처
 
@@ -57,12 +57,19 @@ cp docker/.env.example docker/.env
 # 3. 빌드 & 실행
 docker compose up -d --build
 
-# 4. 접속
+# 4. DB 마이그레이션
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
+
+# 5. Ollama 모델 다운로드 확인 (최초 실행 시 자동, 수동도 가능)
+docker compose exec ollama ollama pull qwen2.5:14b
+
+# 6. 접속
 open http://localhost:8777/          # 데모 대시보드
 open http://localhost:8777/api/      # API Root (Browsable UI)
 ```
 
-> 최초 실행 시 Ollama가 모델을 다운로드합니다 (10분+ 소요).
+> 최초 실행 시 Ollama가 모델을 자동 다운로드합니다 (10분+ 소요).
 > 진행 확인: `docker compose logs -f ollama_init`
 
 ## 기본 워크플로우
@@ -77,16 +84,14 @@ open http://localhost:8777/api/      # API Root (Browsable UI)
 ## LLM 모델 사양
 
 Ollama를 통해 양자화된(Q4) 모델을 사용합니다.
-RTX 3090 (24GB VRAM) 기준으로 두 모델을 교차 사용할 수 있습니다.
 
 | 모델 | 키 | 파라미터 | 양자화 | VRAM 사용량 | 컨텍스트 길이 | 용도 |
 |------|-----|---------|--------|------------|-------------|------|
 | Qwen 2.5 14B | `qwen` | 14.7B | Q4_K_M | ~9 GB | 32K tokens | 기본 모델, 한국어 성능 우수 |
-| Gemma 2 27B | `gemma` | 27.2B | Q4_K_M | ~17 GB | 8K tokens | 대형 모델, 복잡한 추론에 유리 |
 | MiniLM-L12 (임베딩) | — | 118M | FP32 | ~0.5 GB | 512 tokens | 벡터 임베딩 (CPU) |
 
 > Ollama는 요청 시 모델을 GPU에 로드하고, 유휴 시 자동 언로드합니다.
-> 두 모델을 동시에 올리면 ~26GB로 24GB VRAM을 초과할 수 있으므로 교차 사용을 권장합니다.
+> `docker/.env`의 `OLLAMA_QWEN_MODEL`을 변경하면 다른 Ollama 모델로 교체할 수 있습니다.
 
 ## API 엔드포인트
 
@@ -247,7 +252,6 @@ lectomlv-llm/
 ```bash
 docker compose logs ollama_init
 docker compose exec ollama ollama pull qwen2.5:14b
-docker compose exec ollama ollama pull gemma2:27b
 docker compose exec ollama ollama list
 ```
 

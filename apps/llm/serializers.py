@@ -10,9 +10,9 @@ class LLMQueryCreateSerializer(serializers.Serializer):
         help_text="쿼리 유형: search(구간검색), summary(요약), recommend(추천)",
     )
     model_name = serializers.ChoiceField(
-        choices=["qwen", "gemma"],
+        choices=["qwen"],
         default="qwen",
-        help_text="사용할 LLM 모델 (qwen=Qwen2.5 14B, gemma=Gemma2 27B)",
+        help_text="사용할 LLM 모델 (qwen=Qwen2.5 14B)",
     )
     lecture_id = serializers.IntegerField(
         required=False,

@@ -106,7 +106,6 @@ services:
       - |
         until curl -sf http://ollama:11434/api/tags > /dev/null 2>&1; do sleep 2; done
         curl -sf http://ollama:11434/api/pull -d '{"name": "qwen2.5:14b"}' || true
-        curl -sf http://ollama:11434/api/pull -d '{"name": "gemma2:27b"}' || true
     restart: "no"
 
 volumes:

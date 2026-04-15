@@ -119,7 +119,6 @@ CELERY_TASK_SOFT_TIME_LIMIT = 540  # 9분
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://ollama:11434")
 OLLAMA_MODELS = {
     "qwen": os.getenv("OLLAMA_QWEN_MODEL", "qwen2.5:14b"),
-    "gemma": os.getenv("OLLAMA_GEMMA_MODEL", "gemma2:27b"),
 }
 OLLAMA_DEFAULT_MODEL = os.getenv("OLLAMA_DEFAULT_MODEL", "qwen")
 

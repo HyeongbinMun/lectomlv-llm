@@ -302,6 +302,55 @@
       line-height: 1.5;
       color: var(--text);
     }
+    .lecture-seg-text.corrected { color: var(--accent); }
+    .seg-edit-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: transparent;
+      font-size: 0.72rem;
+      padding: 0.1rem 0.35rem;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+      transition: color 0.12s, border-color 0.12s;
+    }
+    .lecture-seg-row:hover .seg-edit-btn {
+      color: var(--text-muted);
+      border-color: var(--border);
+    }
+    .seg-edit-btn:hover { border-color: var(--primary) !important; color: var(--primary) !important; }
+    .rag-seg-edit-btn {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.45rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: border-color 0.12s, color 0.12s;
+    }
+    .rag-seg-edit-btn:hover { border-color: var(--primary); color: var(--primary); }
+    .seg-edit-area {
+      width: 100%;
+      min-height: 60px;
+      background: var(--bg);
+      border: 1px solid var(--primary);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 0.85rem;
+      font-family: inherit;
+      padding: 0.45rem 0.6rem;
+      resize: vertical;
+      line-height: 1.5;
+    }
+    .seg-edit-area:focus { outline: none; border-color: var(--accent); }
+    .seg-edit-hint {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-top: 0.2rem;
+    }
+    .seg-edit-actions { display: flex; gap: 0.4rem; margin-top: 0.35rem; }
     .badge {
       padding: 0.2rem 0.6rem;
       border-radius: 12px;
@@ -1274,7 +1323,10 @@
       if (citedMedia.length) {
         html += '<h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:1rem">인용된 출처</h4>';
         html += citedMedia.map(s => {
-          const tag = (s.citation_tag || '').replace(/"/g, '&quot;');
+          const tag     = (s.citation_tag || '').replace(/"/g, '&quot;');
+          const segId   = s.segment_id || '';
+          const lecId   = s.lecture_id || '';
+          const transcript = escapeHtml(s.transcript || '');
           const offsetRow = `
             <div class="seg-offset-row" data-tag="${tag}" style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-top:0.45rem">
               <span style="font-size:0.75rem;color:var(--text-muted);opacity:0.8">⏱ 시간 조절</span>
@@ -1289,15 +1341,21 @@
               </span>
             </div>`;
           return `
-            <div class="segment-item" style="border-left:3px solid var(--success);flex-direction:column;align-items:stretch;gap:0">
+            <div class="segment-item" id="rag-seg-${segId}"
+                 style="border-left:3px solid var(--success);flex-direction:column;align-items:stretch;gap:0"
+                 data-seg-id="${segId}" data-lecture-id="${lecId}" data-transcript="${transcript}">
               <div style="display:flex;justify-content:space-between;align-items:center">
                 <div>
                   <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600;margin-right:0.5rem">${s.citation_tag || ''}</span>
                   <span class="segment-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
                   <span class="segment-source">${s.source_file || ''}</span>
                 </div>
-                <span class="segment-score">${s.relevance_score ? (s.relevance_score * 100).toFixed(1) + '%' : '-'}</span>
+                <div style="display:flex;align-items:center;gap:0.5rem">
+                  <span class="segment-score">${s.relevance_score ? (s.relevance_score * 100).toFixed(1) + '%' : '-'}</span>
+                  ${segId ? `<button class="rag-seg-edit-btn" onclick="openRagSegEdit('${segId}','${lecId}')">✏ 자막 수정</button>` : ''}
+                </div>
               </div>
+              ${segId ? `<div id="rag-seg-edit-area-${segId}" style="display:none;margin-top:0.5rem"></div>` : ''}
               ${offsetRow}
             </div>`;
         }).join('');
@@ -1688,13 +1746,21 @@
         container.innerHTML = '<div style="padding:0.8rem;text-align:center;color:var(--text-muted)">세그먼트 없음</div>';
         return;
       }
-      container.innerHTML = segments.map((s, i) => `
-        <div class="lecture-seg-row" id="segrow-${s.id}" data-seg-id="${s.id}">
-          <span style="color:var(--text-muted);font-size:0.75rem;min-width:25px">${i + 1}</span>
-          <span class="lecture-seg-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
-          <span class="lecture-seg-text">${escapeHtml(s.transcript || '')}</span>
-        </div>
-      `).join('');
+      container.innerHTML = segments.map((s, i) => {
+        const hasCorrected = s.transcript_corrected && s.transcript_corrected.trim();
+        const displayText  = hasCorrected ? s.transcript_corrected : (s.transcript || '');
+        return `
+          <div class="lecture-seg-row" id="segrow-${s.id}" data-seg-id="${s.id}"
+               data-lecture-id="${lectureId}" data-transcript="${escapeHtml(s.transcript || '')}"
+               data-transcript-corrected="${escapeHtml(s.transcript_corrected || '')}">
+            <span style="color:var(--text-muted);font-size:0.75rem;min-width:25px">${i + 1}</span>
+            <span class="lecture-seg-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
+            <span class="lecture-seg-text${hasCorrected ? ' corrected' : ''}"
+                  style="white-space:pre-wrap">${escapeHtml(displayText)}</span>
+            <button class="seg-edit-btn" onclick="event.stopPropagation();openSegEdit(${s.id}, ${lectureId})">✏ 편집</button>
+          </div>
+        `;
+      }).join('');
     }
 
     // ── 강의 클립 세션 상태 ──────────────────────────────────────────────
@@ -1790,6 +1856,7 @@
 
         row.addEventListener('click', function rowClick(e) {
           if (e.target === chk) return;
+          if (row.querySelector('.seg-edit-area')) return;
           chk.click();
         });
       });
@@ -2162,6 +2229,178 @@
           </div>`;
       } else {
         el.innerHTML = `<div style="color:var(--error);font-size:0.85rem">머지 실패: ${merged.error || merged.status}</div>`;
+      }
+    }
+
+    // ── 세그먼트 자막 인라인 편집 ────────────────────────────────────────
+
+    function openRagSegEdit(segId, lectureId) {
+      const areaEl = document.getElementById('rag-seg-edit-area-' + segId);
+      const card   = document.getElementById('rag-seg-' + segId);
+      if (!areaEl || !card) return;
+
+      if (areaEl.style.display !== 'none') {
+        areaEl.style.display = 'none';
+        return;
+      }
+
+      const corrected    = card.dataset.transcriptCorrected || '';
+      const original     = card.dataset.transcript || '';
+      const editDefault  = corrected || original;
+      const hasCorrected = !!corrected;
+
+      areaEl.innerHTML = `
+        <textarea class="seg-edit-area" id="rag-seg-ta-${segId}"
+          style="width:100%;box-sizing:border-box"
+        >${escapeHtml(editDefault)}</textarea>
+        <div class="seg-edit-hint">Enter = 줄바꿈 &nbsp;|&nbsp; 저장하면 클립 생성 시 반영됩니다</div>
+        <div class="seg-edit-actions">
+          <button class="btn btn-sm btn-accent" style="font-size:0.78rem;padding:0.25rem 0.6rem"
+            onclick="saveRagSegEdit('${segId}','${lectureId}')">저장</button>
+          <button class="btn btn-sm btn-ghost" style="font-size:0.78rem;padding:0.25rem 0.6rem"
+            onclick="document.getElementById('rag-seg-edit-area-${segId}').style.display='none'">닫기</button>
+          ${hasCorrected ? `<button class="btn btn-sm" style="font-size:0.78rem;padding:0.25rem 0.6rem;background:transparent;border:1px solid var(--error);color:var(--error)"
+            onclick="clearRagSegEdit('${segId}','${lectureId}')">원본으로 되돌리기</button>` : ''}
+        </div>`;
+      areaEl.style.display = 'block';
+      const ta = document.getElementById('rag-seg-ta-' + segId);
+      if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+    }
+
+    async function saveRagSegEdit(segId, lectureId) {
+      const ta  = document.getElementById('rag-seg-ta-' + segId);
+      const btn = ta?.closest('.seg-edit-actions')?.querySelector('.btn-accent');
+      if (!ta) return;
+      const value = ta.value;
+      if (btn) { btn.disabled = true; btn.textContent = '저장 중...'; }
+
+      try {
+        const res = await fetch(API + `/api/lectures/${lectureId}/segments/${segId}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ transcript_corrected: value }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const card = document.getElementById('rag-seg-' + segId);
+        if (card) {
+          card.dataset.transcriptCorrected = value;
+        }
+        document.getElementById('rag-seg-edit-area-' + segId).style.display = 'none';
+        toast('자막이 저장되었습니다. 클립을 새로 생성하면 반영됩니다.', 'success');
+      } catch (e) {
+        if (btn) { btn.disabled = false; btn.textContent = '저장'; }
+        toast('저장 실패: ' + e.message, 'error');
+      }
+    }
+
+    async function clearRagSegEdit(segId, lectureId) {
+      if (!confirm('교정 자막을 삭제하고 원본 STT로 되돌립니까?')) return;
+      try {
+        await fetch(API + `/api/lectures/${lectureId}/segments/${segId}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ transcript_corrected: '' }),
+        });
+        const card = document.getElementById('rag-seg-' + segId);
+        if (card) card.dataset.transcriptCorrected = '';
+        document.getElementById('rag-seg-edit-area-' + segId).style.display = 'none';
+        toast('원본으로 되돌렸습니다.', 'success');
+      } catch (e) {
+        toast('오류: ' + e.message, 'error');
+      }
+    }
+
+    function openSegEdit(segId, lectureId) {
+      const row = document.getElementById('segrow-' + segId);
+      if (!row || row.querySelector('.seg-edit-area')) return;
+
+      const textSpan    = row.querySelector('.lecture-seg-text');
+      const editBtn     = row.querySelector('.seg-edit-btn');
+      const corrected   = row.dataset.transcriptCorrected || '';
+      const original    = row.dataset.transcript || '';
+      const editDefault = corrected || original;
+
+      textSpan.style.display = 'none';
+      editBtn.style.display  = 'none';
+
+      const wrapper = document.createElement('div');
+      wrapper.style.flex = '1';
+      wrapper.innerHTML = `
+        <textarea class="seg-edit-area" id="seg-ta-${segId}">${escapeHtml(editDefault)}</textarea>
+        <div class="seg-edit-hint">Enter = 줄바꿈 &nbsp;|&nbsp; 저장하면 클립 생성 시 반영됩니다</div>
+        <div class="seg-edit-actions">
+          <button class="btn btn-sm btn-accent" style="font-size:0.78rem;padding:0.25rem 0.6rem"
+            onclick="saveSegEdit(${segId}, ${lectureId})">저장</button>
+          <button class="btn btn-sm btn-ghost" style="font-size:0.78rem;padding:0.25rem 0.6rem"
+            onclick="cancelSegEdit(${segId})">취소</button>
+          ${row.dataset.transcriptCorrected ? `
+          <button class="btn btn-sm" style="font-size:0.78rem;padding:0.25rem 0.6rem;background:transparent;border:1px solid var(--error);color:var(--error)"
+            onclick="clearSegEdit(${segId}, ${lectureId})">원본으로 되돌리기</button>` : ''}
+        </div>`;
+      row.appendChild(wrapper);
+      const ta = document.getElementById('seg-ta-' + segId);
+      if (ta) { ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length); }
+    }
+
+    function cancelSegEdit(segId) {
+      const row = document.getElementById('segrow-' + segId);
+      if (!row) return;
+      row.querySelector('.lecture-seg-text').style.display = '';
+      row.querySelector('.seg-edit-btn').style.display  = '';
+      row.querySelector('div[style*="flex: 1"]')?.remove();
+    }
+
+    async function saveSegEdit(segId, lectureId) {
+      const ta  = document.getElementById('seg-ta-' + segId);
+      const row = document.getElementById('segrow-' + segId);
+      if (!ta || !row) return;
+
+      const value = ta.value;
+      const btn   = row.querySelector('.btn-accent');
+      btn.disabled    = true;
+      btn.textContent = '저장 중...';
+
+      try {
+        const res = await fetch(API + `/api/lectures/${lectureId}/segments/${segId}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ transcript_corrected: value }),
+        });
+        if (!res.ok) throw new Error(await res.text());
+
+        row.dataset.transcriptCorrected = value;
+        const textSpan = row.querySelector('.lecture-seg-text');
+        const displayText = value.trim() ? value : (row.dataset.transcript || '');
+        textSpan.textContent = displayText;
+        textSpan.classList.toggle('corrected', !!value.trim());
+        cancelSegEdit(segId);
+        toast('자막이 저장되었습니다.', 'success');
+      } catch (e) {
+        btn.disabled    = false;
+        btn.textContent = '저장';
+        toast('저장 실패: ' + e.message, 'error');
+      }
+    }
+
+    async function clearSegEdit(segId, lectureId) {
+      const row = document.getElementById('segrow-' + segId);
+      if (!row) return;
+      if (!confirm('교정 자막을 삭제하고 원본 STT로 되돌립니까?')) return;
+
+      try {
+        await fetch(API + `/api/lectures/${lectureId}/segments/${segId}/`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ transcript_corrected: '' }),
+        });
+        row.dataset.transcriptCorrected = '';
+        const textSpan = row.querySelector('.lecture-seg-text');
+        textSpan.textContent = row.dataset.transcript || '';
+        textSpan.classList.remove('corrected');
+        cancelSegEdit(segId);
+        toast('원본으로 되돌렸습니다.', 'success');
+      } catch (e) {
+        toast('오류: ' + e.message, 'error');
       }
     }
 

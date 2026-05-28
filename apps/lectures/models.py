@@ -31,6 +31,11 @@ class LectureSegment(models.Model):
     start_time = models.CharField(max_length=20, help_text="구간 시작 시간 (HH:MM:SS 또는 MM:SS)")
     end_time = models.CharField(max_length=20, help_text="구간 종료 시간")
     transcript = models.TextField(help_text="STT 변환 텍스트")
+    transcript_corrected = models.TextField(
+        blank=True,
+        default="",
+        help_text="수동 교정 자막 텍스트 (비어 있으면 transcript 사용, \\n으로 줄바꿈)",
+    )
     embedding_id = models.IntegerField(
         null=True,
         blank=True,

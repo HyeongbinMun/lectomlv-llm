@@ -162,7 +162,7 @@ class RAGService:
                 source_file = segment.lecture.source_file
                 start_time = segment.start_time
                 end_time = segment.end_time
-                transcript = segment.transcript
+                transcript = segment.transcript_corrected or segment.transcript
             except LectureSegment.DoesNotExist:
                 source_file = result.get("source_file", "?")
                 start_time = result.get("start_time", "?")

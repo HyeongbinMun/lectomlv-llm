@@ -19,6 +19,7 @@
 - **클립 선택 & 순서 변경** — 머지할 클립을 체크박스로 선택하고 순서 조절
 - **클립 머지** — 생성된 클립들을 하나의 mp4로 합치기
 - **직접 선택 클립** — RAG 없이 강의 세그먼트를 직접 선택하여 클립 생성 및 머지
+- **자막 인라인 편집** — 세그먼트별 STT 교정본(`transcript_corrected`) 직접 수정, `Enter`로 줄바꿈 삽입
 - **외부 JSON 자동 변환** — PPTX 슬라이드·영상 자막 등 다양한 형식 자동 감지 및 임포트
 - **JSON 직접 붙여넣기** — 강의 데이터 JSON을 웹 UI에서 직접 입력하여 업로드
 - **비디오/문서 분리 표시** — RAG 결과에서 영상·음성과 슬라이드·PDF를 별도 섹션으로 표시
@@ -120,6 +121,7 @@ Ollama를 통해 양자화된(Q4) 모델을 사용합니다.
 | PUT | `/api/lectures/{id}/` | 강의 수정 |
 | DELETE | `/api/lectures/{id}/` | 강의 삭제 |
 | GET | `/api/lectures/{id}/segments/` | 구간 목록 |
+| PATCH | `/api/lectures/{id}/segments/{seg_id}/` | 구간 교정 자막 저장 |
 | POST | `/api/lectures/bulk-import/` | STT 데이터 일괄 임포트 |
 
 ### LLM 쿼리
@@ -198,6 +200,16 @@ Ollama를 통해 양자화된(Q4) 모델을 사용합니다.
 
 비율 변환이나 자막·오버레이가 적용될 경우 libx264로 재인코딩되며, 아무것도 없을 때는 `-c copy`로 빠르게 처리됩니다.  
 생성된 클립과 머지 파일은 `http://서버:8777/clips/{파일명}` 으로 직접 다운로드할 수 있습니다.
+
+#### 구간 교정 자막 저장 — `PATCH /api/lectures/{id}/segments/{seg_id}/`
+
+```json
+{ "transcript_corrected": "수정된 자막 텍스트\n두 번째 줄" }
+```
+
+- `transcript_corrected`가 비어 있지 않으면 클립 생성 시 원본 `transcript` 대신 사용됩니다.
+- `\n`(줄바꿈)은 ASS 자막의 강제 줄바꿈(`\N`)으로 변환되어 원하는 위치에 줄이 나뉩니다.
+- 빈 문자열(`""`)로 저장하면 원본 STT로 되돌립니다.
 
 ## 강의 데이터 JSON 형식
 
@@ -371,9 +383,9 @@ services:
 lectomlv-llm/
 ├── apps/
 │   ├── lectures/                   # 강의 데이터 관리
-│   │   ├── models.py               # Lecture, LectureSegment
+│   │   ├── models.py               # Lecture, LectureSegment (transcript_corrected 포함)
 │   │   ├── serializers.py
-│   │   ├── views.py                # CRUD + BulkImport
+│   │   ├── views.py                # CRUD + BulkImport + SegmentTranscriptUpdate
 │   │   ├── converter.py            # 외부 JSON → 내부 형식 변환
 │   │   ├── tasks.py                # FAISS 인덱싱 Celery 태스크
 │   │   └── urls.py

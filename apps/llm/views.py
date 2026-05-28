@@ -224,15 +224,16 @@ class ManualClipView(APIView):
         # cited_sources 형태로 변환
         cited_sources = [
             {
-                "segment_id":   seg.id,
-                "lecture_id":   seg.lecture.id,
-                "lecture_title": seg.lecture.title,
-                "source_file":  seg.lecture.source_file,
-                "start_time":   seg.start_time,
-                "end_time":     seg.end_time,
-                "transcript":   seg.transcript,
-                "citation_tag": f"[M{i}]",
-                "cited":        True,
+                "segment_id":          seg.id,
+                "lecture_id":          seg.lecture.id,
+                "lecture_title":       seg.lecture.title,
+                "source_file":         seg.lecture.source_file,
+                "start_time":          seg.start_time,
+                "end_time":            seg.end_time,
+                "transcript":          seg.transcript,
+                "transcript_corrected": seg.transcript_corrected,
+                "citation_tag":        f"[M{i}]",
+                "cited":               True,
             }
             for i, seg in enumerate(segments, 1)
         ]

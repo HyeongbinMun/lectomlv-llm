@@ -10,13 +10,11 @@ from django.conf import settings as django_settings
 
 
 def _resolve_ffmpeg_bin() -> str:
-    """시스템 ffmpeg(drawtext 등 필터 포함)을 우선 사용하고, 없으면 imageio_ffmpeg 번들 사용."""
     system = shutil.which("ffmpeg")
     return system if system else imageio_ffmpeg.get_ffmpeg_exe()
 
 
 def _check_filter_support(ffmpeg_bin: str, filter_name: str) -> bool:
-    """ffmpeg 바이너리가 특정 필터를 지원하는지 확인."""
     try:
         proc = subprocess.run(
             [ffmpeg_bin, "-filters"],
@@ -75,7 +73,6 @@ def _safe_filename(time_str: str) -> str:
 
 
 def _ass_timestamp(seconds: float) -> str:
-    """ASS 형식 타임스탬프: H:MM:SS.cc (centiseconds)"""
     h  = int(seconds // 3600)
     m  = int((seconds % 3600) // 60)
     s  = int(seconds % 60)
@@ -84,32 +81,31 @@ def _ass_timestamp(seconds: float) -> str:
 
 
 def _split_transcript_lines(transcript: str, max_chars: int = 28) -> list[str]:
-    """transcript를 max_chars 기준으로 줄 분할 (한국어 고려: 짧게)"""
-    words = transcript.split()
-    if not words:
-        return []
-    lines: list[str] = []
-    current: list[str] = []
-    cur_len = 0
-    for word in words:
-        add = len(word) + (1 if current else 0)
-        if cur_len + add > max_chars and current:
-            lines.append(" ".join(current))
-            current = [word]
-            cur_len = len(word)
-        else:
-            current.append(word)
-            cur_len += add
-    if current:
-        lines.append(" ".join(current))
-    return lines
+    result: list[str] = []
+    for manual_line in transcript.split("\n"):
+        words = manual_line.split()
+        if not words:
+            continue
+        current: list[str] = []
+        cur_len = 0
+        for word in words:
+            add = len(word) + (1 if current else 0)
+            if cur_len + add > max_chars and current:
+                result.append(" ".join(current))
+                current = [word]
+                cur_len = len(word)
+            else:
+                current.append(word)
+                cur_len += add
+        if current:
+            result.append(" ".join(current))
+    return result
 
 
 _DRAWTEXT_FONT = "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc"
 
 
 def _escape_drawtext(text: str) -> str:
-    """ffmpeg drawtext text 옵션용 특수문자 이스케이프"""
     text = text.replace("\\", "\\\\")
     text = text.replace(":", "\\:")
     text = text.replace("'", "\\'")
@@ -298,8 +294,18 @@ class VideoClipService:
         start_time    = src.get("start_time", "")
         end_time      = src.get("end_time", "")
         tag           = src.get("citation_tag", "")
-        transcript    = src.get("transcript", "")
         lecture_title = (src.get("lecture_title") or "").strip() if with_title else ""
+
+        transcript = src.get("transcript_corrected", "")
+        if not transcript and src.get("segment_id"):
+            try:
+                from apps.lectures.models import LectureSegment
+                seg = LectureSegment.objects.only("transcript_corrected").get(id=src["segment_id"])
+                transcript = seg.transcript_corrected
+            except Exception:
+                pass
+        if not transcript:
+            transcript = src.get("transcript", "")
 
         if not _is_video_file(source_file):
             return None

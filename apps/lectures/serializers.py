@@ -11,10 +11,17 @@ class LectureSegmentSerializer(serializers.ModelSerializer):
             "start_time",
             "end_time",
             "transcript",
+            "transcript_corrected",
             "time_range",
             "created_at",
         ]
         read_only_fields = ["id", "time_range", "created_at"]
+
+
+class SegmentTranscriptUpdateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = LectureSegment
+        fields = ["transcript_corrected"]
 
 
 class LectureSerializer(serializers.ModelSerializer):

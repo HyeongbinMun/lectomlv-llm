@@ -9,6 +9,7 @@ from .serializers import (
     LectureListSerializer,
     LectureSegmentSerializer,
     LectureSerializer,
+    SegmentTranscriptUpdateSerializer,
 )
 from .tasks import index_lecture_segments
 
@@ -34,25 +35,27 @@ class LectureSegmentListView(generics.ListAPIView):
         return LectureSegment.objects.filter(lecture_id=self.kwargs["lecture_pk"])
 
 
-class BulkImportView(APIView):
-    """
-    STT 데이터 일괄 임포트 + FAISS 인덱싱 트리거
+class SegmentTranscriptUpdateView(APIView):
+    def patch(self, request, lecture_pk, seg_pk):
+        try:
+            seg = LectureSegment.objects.get(pk=seg_pk, lecture_id=lecture_pk)
+        except LectureSegment.DoesNotExist:
+            return Response({"error": "세그먼트를 찾을 수 없습니다."}, status=status.HTTP_404_NOT_FOUND)
 
-    지원 형식:
-    1. 내부 형식: {"title", "source_file", "segments": [{"start_time", "end_time", "transcript"}]}
-    2. 외부 형식: {"slides_data": [...], "materials": [...]}  (자동 변환)
-    """
+        serializer = SegmentTranscriptUpdateSerializer(seg, data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({"id": seg.pk, "transcript_corrected": seg.transcript_corrected})
+
+
+class BulkImportView(APIView):
 
     def post(self, request):
         data = request.data
 
-        # 외부 형식 자동 감지 → 내부 형식으로 변환
         converted = detect_and_convert(data)
-
         if converted:
             return self._import_multiple(converted)
-
-        # 내부 형식 그대로 처리
         return self._import_single(data)
 
     def _import_single(self, data):

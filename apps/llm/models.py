@@ -5,6 +5,7 @@ class QueryType(models.TextChoices):
     SEARCH = "search", "구간 검색"
     SUMMARY = "summary", "요약"
     RECOMMEND = "recommend", "추천"
+    MANUAL_CLIP = "manual_clip", "직접 선택 클립"
 
 
 class QueryStatus(models.TextChoices):

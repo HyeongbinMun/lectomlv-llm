@@ -83,7 +83,7 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    select, input[type="number"] {
+    select, input[type="number"], input[type="text"] {
       width: 100%;
       padding: 0.6rem 0.8rem;
       background: var(--bg);
@@ -104,7 +104,7 @@
       min-height: 80px;
       font-family: inherit;
     }
-    textarea:focus, select:focus { outline: none; border-color: var(--primary); }
+    textarea:focus, select:focus, input[type="text"]:focus { outline: none; border-color: var(--primary); }
     .btn {
       padding: 0.7rem 1.5rem;
       border: none;
@@ -415,6 +415,169 @@
       font-size: 0.88rem;
       padding: 0.8rem 0;
     }
+
+    /* 클립 순서/선택 컨트롤 */
+    .clip-order-controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      flex-shrink: 0;
+      padding-right: 0.7rem;
+      border-right: 1px solid var(--border);
+      margin-right: 0.7rem;
+    }
+    .clip-order-num {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      font-family: monospace;
+      min-width: 18px;
+      text-align: center;
+    }
+    .btn-order {
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      border-radius: 4px;
+      width: 22px;
+      height: 20px;
+      font-size: 0.75rem;
+      line-height: 1;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.15s;
+    }
+    .btn-order:hover:not(:disabled) { border-color: var(--primary); color: var(--text); }
+    .btn-order:disabled { opacity: 0.25; cursor: default; }
+    .clip-checkbox {
+      width: 15px;
+      height: 15px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .merge-count-info {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+    .merge-count-info strong { color: var(--accent); }
+
+    /* ── 강의 목록 클립 편집 패널 ── */
+    .lec-clip-panel {
+      border-top: 2px dashed var(--primary);
+      margin-top: 0.8rem;
+      background: rgba(108,92,231,0.04);
+      border-radius: 0 0 8px 8px;
+      padding: 0.9rem 1rem;
+    }
+    .lec-clip-opts {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+    }
+    .lec-seg-chk {
+      width: 14px;
+      height: 14px;
+      accent-color: var(--accent);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .lecture-seg-row.clip-mode {
+      cursor: pointer;
+      user-select: none;
+    }
+    .lecture-seg-row.clip-mode:hover { background: rgba(108,92,231,0.08); }
+    .lecture-seg-row.clip-mode.selected { background: rgba(108,92,231,0.12); }
+
+    /* 클립 편집 버튼 (강의 카드 헤더 내) */
+    .btn-lec-clip-edit {
+      font-size: 0.78rem;
+      padding: 0.25rem 0.55rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .btn-lec-clip-edit:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-lec-clip-edit.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+
+    /* 클립 옵션 행 */
+    .clip-opts-row {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+    .clip-opts-label {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .clip-opts-sep {
+      width: 1px;
+      height: 16px;
+      background: var(--border);
+      flex-shrink: 0;
+    }
+    .title-pos-group {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .title-pos-group label {
+      display: flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      cursor: pointer;
+      white-space: nowrap;
+    }
+    .title-pos-group input[type="radio"] {
+      accent-color: var(--accent);
+      width: 13px;
+      height: 13px;
+    }
+    /* 시간 조절 행 */
+    .clip-time-adj {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+    }
+    .clip-time-adj span { white-space: nowrap; }
+    .time-adj-input {
+      width: 58px;
+      padding: 0.25rem 0.4rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 0.82rem;
+      text-align: center;
+    }
+    .time-adj-input:focus { outline: none; border-color: var(--accent); }
   </style>
 </head>
 <body>
@@ -498,21 +661,39 @@
                 영상 클립
                 <span id="clip-count-badge" style="background:var(--accent);color:var(--bg);padding:0.1rem 0.5rem;border-radius:10px;font-size:0.72rem;display:none"></span>
               </div>
-              <div style="display:flex;align-items:center;gap:0.6rem;flex-wrap:wrap">
-                <label style="display:flex;align-items:center;gap:0.3rem;font-size:0.82rem;color:var(--text-muted);cursor:pointer">
-                  <input type="checkbox" id="opt-subtitle" checked style="accent-color:var(--accent)">
-                  자막
-                </label>
-                <select id="opt-ratio" style="padding:0.3rem 0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem;cursor:pointer">
-                  <option value="">원본 비율</option>
-                  <option value="16:9">16:9 (가로)</option>
-                  <option value="9:16">9:16 (세로/쇼츠)</option>
-                  <option value="1:1">1:1 (정사각)</option>
-                  <option value="4:3">4:3</option>
-                </select>
-                <button id="btn-clip" class="btn btn-accent btn-sm" onclick="triggerClip()" style="font-size:0.82rem;padding:0.35rem 0.9rem">
-                  ✂ 클립 자르기
-                </button>
+              <div style="display:flex;flex-direction:column;gap:0.45rem;align-items:flex-end">
+                <!-- 옵션 Row 1: 자막 / 강의명+위치 / 비율 / 클립 버튼 -->
+                <div class="clip-opts-row">
+                  <label class="clip-opts-label">
+                    <input type="checkbox" id="opt-subtitle" checked style="accent-color:var(--accent);width:13px;height:13px">
+                    자막
+                  </label>
+                  <div class="clip-opts-sep"></div>
+                  <label class="clip-opts-label">
+                    <input type="checkbox" id="opt-title" style="accent-color:var(--accent);width:13px;height:13px" onchange="toggleTitlePos()">
+                    강의명
+                  </label>
+                  <div id="title-pos-group" class="title-pos-group" style="display:none">
+                    <label><input type="radio" name="title-pos" value="left"> 왼쪽</label>
+                    <label><input type="radio" name="title-pos" value="center"> 가운데</label>
+                    <label><input type="radio" name="title-pos" value="right" checked> 오른쪽</label>
+                  </div>
+                  <div class="clip-opts-sep"></div>
+                  <select id="opt-ratio" style="padding:0.3rem 0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem;cursor:pointer">
+                    <option value="">원본 비율</option>
+                    <option value="16:9">16:9 (가로)</option>
+                    <option value="9:16">9:16 (세로/쇼츠)</option>
+                    <option value="1:1">1:1 (정사각)</option>
+                    <option value="4:3">4:3</option>
+                  </select>
+                  <button id="btn-clip" class="btn btn-accent btn-sm" onclick="triggerClip()" style="font-size:0.82rem;padding:0.35rem 0.9rem">
+                    ✂ 클립 자르기
+                  </button>
+                </div>
+                <!-- Row 2: 시간 조절은 아래 인용 출처 목록에서 클립별로 개별 설정 -->
+                <div style="font-size:0.75rem;color:var(--text-muted);opacity:0.8;text-align:right">
+                  ⏱ 시간 조절은 아래 <strong style="color:var(--accent)">인용 출처</strong> 항목별로 설정
+                </div>
               </div>
             </div>
             <div id="video-clips-list"></div>
@@ -543,6 +724,46 @@
         <button class="btn btn-accent" onclick="document.getElementById('file-input').click()">파일 선택</button>
       </div>
 
+      <!-- JSON 직접 붙여넣기 -->
+      <div class="manual-form" style="margin-bottom:1.2rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.9rem">
+          <h3 style="font-size:1rem">JSON 직접 붙여넣기</h3>
+          <button class="btn btn-sm btn-ghost" onclick="toggleJsonPaste(this)">접기 ▲</button>
+        </div>
+        <div id="json-paste-body">
+          <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:0.7rem">
+            아래 형식의 JSON을 그대로 붙여넣으세요. <code style="font-size:0.75rem;color:var(--accent)">segments[]</code> 배열의
+            <code style="font-size:0.75rem;color:var(--accent)">start_time / end_time / transcript</code> 필드를 인식합니다.
+          </p>
+          <textarea id="json-paste-input"
+            placeholder='{
+  "title": "신경회로망특론 3강",
+  "source_file": "3. CS231_Lecture3.mp4",
+  "description": "video | ko | 262 segments",
+  "segments": [
+    {
+      "start_time": "00:02",
+      "end_time": "00:28",
+      "transcript": "자 오늘 수업을 시작하도록 하지..."
+    }
+  ]
+}'
+            style="width:100%;min-height:180px;font-family:monospace;font-size:0.83rem;padding:0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);resize:vertical"
+            oninput="previewJsonPaste()"
+            spellcheck="false"></textarea>
+
+          <!-- 미리보기 -->
+          <div id="json-paste-preview" style="display:none;margin-top:0.55rem;padding:0.6rem 0.9rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;font-size:0.85rem"></div>
+
+          <div style="margin-top:0.8rem;display:flex;gap:0.6rem;flex-wrap:wrap">
+            <button class="btn btn-primary" onclick="submitJsonPaste()">업로드</button>
+            <button class="btn btn-ghost btn-sm" onclick="fillFormFromJson()" style="font-size:0.88rem">
+              ↓ 아래 폼에 채우기
+            </button>
+          </div>
+        </div>
+      </div>
+
       <div class="manual-form">
         <h3 style="margin-bottom:1rem;font-size:1rem">직접 입력</h3>
         <div class="form-row">
@@ -557,7 +778,7 @@
         </div>
         <div style="margin-bottom:1rem">
           <label style="display:block;font-size:0.8rem;color:var(--text-muted);margin-bottom:0.4rem;text-transform:uppercase;letter-spacing:0.05em">설명</label>
-          <input type="text" id="u-desc" placeholder="강의 설명 (선택)" style="width:100%;padding:0.6rem 0.8rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:0.95rem">
+          <input type="text" id="u-desc" placeholder="강의 설명 (선택)">
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.8rem">
@@ -630,6 +851,10 @@
     let clipPollTimer = null;
     let currentQueryId = null;
 
+    // 클립 순서/선택 상태 관리
+    let mergeClipList = []; // [{clip, selected}] — 성공 클립만, 순서 유지
+    let allLastClips   = []; // renderVideoClips 에 전달된 전체 클립 (실패 포함)
+
     {% if query_id %}
     document.addEventListener('DOMContentLoaded', function() {
       currentQueryId = '{{ query_id }}';
@@ -639,6 +864,11 @@
 
     function isVideoFile(sourceFile) {
       return /\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v)$/i.test(sourceFile || '');
+    }
+
+    function isMediaFile(sourceFile) {
+      // 영상 또는 음성 파일 여부 (RAG 출처 목록 표시 및 클립 생성 대상)
+      return /\.(mp4|mkv|avi|mov|wmv|flv|webm|m4v|mp3|wav|aac|m4a|ogg|flac|opus)$/i.test(sourceFile || '');
     }
 
     function pollResult(queryId) {
@@ -655,9 +885,9 @@
             renderSegments(data.retrieved_segments || []);
             renderGrounding(data.grounding || {});
 
-            // 인용된 출처 중 영상 파일이 있으면 클립 섹션 + 버튼 표시
+            // 인용된 출처 중 영상/음성 파일이 있으면 클립 섹션 + 버튼 표시
             const hasVideoSources = (data.retrieved_segments || []).some(
-              s => s.cited && isVideoFile(s.source_file)
+              s => s.cited && isMediaFile(s.source_file)
             );
             if (hasVideoSources) {
               document.getElementById('video-clips-section').style.display = 'block';
@@ -679,22 +909,48 @@
       }, 2000);
     }
 
+    function toggleTitlePos() {
+      const checked = document.getElementById('opt-title')?.checked;
+      document.getElementById('title-pos-group').style.display = checked ? 'flex' : 'none';
+    }
+
     async function triggerClip() {
       if (!currentQueryId) return;
       const btn       = document.getElementById('btn-clip');
       const list      = document.getElementById('video-clips-list');
       const ratio     = document.getElementById('opt-ratio')?.value || null;
       const subtitles = document.getElementById('opt-subtitle')?.checked ?? true;
+      const withTitle = document.getElementById('opt-title')?.checked ?? false;
+      const titlePos  = document.querySelector('input[name="title-pos"]:checked')?.value || 'right';
+
+      // 인용 출처별 개별 시간 오프셋 수집
+      const segmentOffsets = [];
+      document.querySelectorAll('.seg-offset-row').forEach(row => {
+        const tag         = row.dataset.tag;
+        const startOffset = parseFloat(row.querySelector('.seg-start-offset')?.value || '0');
+        const endOffset   = parseFloat(row.querySelector('.seg-end-offset')?.value   || '0');
+        segmentOffsets.push({ citation_tag: tag, start_offset_sec: startOffset, end_offset_sec: endOffset });
+      });
 
       btn.disabled = true;
       btn.textContent = '⏳ 생성 중...';
       list.innerHTML = '<div class="clip-loading"><span class="spinner"></span>ffmpeg으로 클립을 생성 중입니다...</div>';
 
+      // 새 클립 생성 시 순서 초기화
+      mergeClipList = [];
+      allLastClips  = [];
+
       try {
         const res = await fetch(API + '/api/llm/query/' + currentQueryId + '/clip/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
-          body: JSON.stringify({ aspect_ratio: ratio || null, with_subtitles: subtitles }),
+          body: JSON.stringify({
+            aspect_ratio:    ratio || null,
+            with_subtitles:  subtitles,
+            with_title:      withTitle,
+            title_position:  titlePos,
+            segment_offsets: segmentOffsets,
+          }),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -750,6 +1006,16 @@
       const btn = document.getElementById('btn-merge');
       const result = document.getElementById('merge-result');
 
+      // 선택된 클립만 현재 순서대로 수집
+      const selectedFilenames = mergeClipList
+        .filter(it => it.selected && it.clip.clip_filename)
+        .map(it => it.clip.clip_filename);
+
+      if (selectedFilenames.length === 0) {
+        toast('머지할 클립을 1개 이상 선택하세요.', 'error');
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = '⏳ 합치는 중...';
       result.innerHTML = '<div class="clip-loading"><span class="spinner"></span>클립을 하나로 합치는 중입니다...</div>';
@@ -758,6 +1024,7 @@
         const res = await fetch(API + '/api/llm/query/' + currentQueryId + '/merge/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ selected_clips: selectedFilenames }),
         });
         if (!res.ok) {
           const err = await res.json();
@@ -827,48 +1094,106 @@
     }
 
     function renderVideoClips(clips) {
+      allLastClips = clips;
       const section = document.getElementById('video-clips-section');
-      const list = document.getElementById('video-clips-list');
-      const badge = document.getElementById('clip-count-badge');
+      const badge   = document.getElementById('clip-count-badge');
       section.style.display = 'block';
 
-      const successCount = clips.filter(c => c.status === 'success').length;
-      if (successCount > 0) {
-        badge.textContent = successCount + '개';
+      const successClips = clips.filter(c => c.status === 'success');
+      if (successClips.length > 0) {
+        badge.textContent = successClips.length + '개';
         badge.style.display = 'inline-block';
         document.getElementById('merge-section').style.display = 'block';
       }
 
-      if (!clips.length) {
+      // 성공 클립 목록 초기화 (이미 있으면 기존 순서/선택 유지)
+      const existingFn = new Set(mergeClipList.map(it => it.clip.clip_filename));
+      const newClips = successClips.filter(c => !existingFn.has(c.clip_filename));
+      newClips.forEach(c => mergeClipList.push({ clip: c, selected: true }));
+
+      rerenderClipList();
+    }
+
+    function rerenderClipList() {
+      const list = document.getElementById('video-clips-list');
+      if (!allLastClips.length) {
         list.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem;padding:0.5rem 0">생성된 클립이 없습니다.</div>';
         return;
       }
 
-      list.innerHTML = clips.map(clip => {
-        const statusLabel = { success: '완료', not_found: '파일 없음', failed: '실패', skipped: '건너뜀' }[clip.status] || clip.status;
-        const cardClass = `clip-card clip-${clip.status}`;
-        const downloadBtn = clip.status === 'success' && clip.clip_url
-          ? `<a class="btn-download" href="${clip.clip_url}" download="${clip.clip_filename || ''}">다운로드</a>`
-          : '';
-        const errorNote = clip.error
-          ? `<span style="font-size:0.78rem;color:var(--error)">${clip.error}</span>`
-          : '';
-        return `
-          <div class="${cardClass}">
+      const selectedCount = mergeClipList.filter(it => it.selected).length;
+      let html = '';
+
+      if (mergeClipList.length > 0) {
+        html += `<div class="merge-count-info">머지 대상: <strong>${selectedCount}</strong> / ${mergeClipList.length}개 선택됨</div>`;
+      }
+
+      // 성공 클립 — 체크박스 + 순서 버튼 포함
+      mergeClipList.forEach(({ clip, selected }, idx) => {
+        const isFirst = idx === 0;
+        const isLast  = idx === mergeClipList.length - 1;
+        const ratioMatch = clip.clip_filename && clip.clip_filename.match(/_(16x9|9x16|1x1|4x3)\.mp4$/);
+        html += `
+          <div class="clip-card clip-success" style="${!selected ? 'opacity:0.5' : ''}">
+            <div class="clip-order-controls">
+              <input type="checkbox" class="clip-checkbox" ${selected ? 'checked' : ''}
+                onchange="toggleClipSelection(${idx})" title="머지에 포함">
+              <button class="btn-order" onclick="moveClip(${idx},-1)" ${isFirst ? 'disabled' : ''} title="위로">▲</button>
+              <span class="clip-order-num">#${idx + 1}</span>
+              <button class="btn-order" onclick="moveClip(${idx},1)" ${isLast ? 'disabled' : ''} title="아래로">▼</button>
+            </div>
             <div class="clip-info">
               <div class="clip-meta">
                 <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600">${clip.citation_tag || ''}</span>
                 <span class="clip-time">${clip.start_time || '?'} ~ ${clip.end_time || '?'}</span>
-                <span class="clip-status clip-status-${clip.status}">${statusLabel}</span>
-                ${clip.clip_filename && clip.clip_filename.match(/_(16x9|9x16|1x1|4x3)\.mp4$/) ? `<span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.45rem;border-radius:10px;font-size:0.73rem">${clip.clip_filename.match(/_(16x9|9x16|1x1|4x3)\.mp4$/)[1].replace('x',':')}</span>` : ''}
+                <span class="clip-status clip-status-success">완료</span>
+                ${ratioMatch ? `<span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.45rem;border-radius:10px;font-size:0.73rem">${ratioMatch[1].replace('x',':')}</span>` : ''}
               </div>
               <div class="clip-filename" title="${clip.source_file || ''}">${clip.source_file || ''}</div>
               ${clip.clip_filename ? `<div style="font-size:0.78rem;color:var(--text-muted);font-family:monospace">${clip.clip_filename}</div>` : ''}
-              ${errorNote}
             </div>
-            <div class="clip-actions">${downloadBtn}</div>
+            <div class="clip-actions">
+              ${clip.clip_url ? `<a class="btn-download" href="${clip.clip_url}" download="${clip.clip_filename || ''}">다운로드</a>` : ''}
+            </div>
           </div>`;
-      }).join('');
+      });
+
+      // 실패/없음 클립 — 정보만 표시
+      const failedClips = allLastClips.filter(c => c.status !== 'success');
+      if (failedClips.length > 0) {
+        html += `<div style="margin-top:0.6rem;font-size:0.8rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.04em;padding:0.3rem 0">처리 실패 클립</div>`;
+        failedClips.forEach(clip => {
+          const statusLabel = { not_found: '파일 없음', failed: '실패', skipped: '건너뜀' }[clip.status] || clip.status;
+          html += `
+            <div class="clip-card clip-${clip.status}">
+              <div class="clip-info">
+                <div class="clip-meta">
+                  <span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600">${clip.citation_tag || ''}</span>
+                  <span class="clip-time">${clip.start_time || '?'} ~ ${clip.end_time || '?'}</span>
+                  <span class="clip-status clip-status-${clip.status}">${statusLabel}</span>
+                </div>
+                <div class="clip-filename" title="${clip.source_file || ''}">${clip.source_file || ''}</div>
+                ${clip.error ? `<span style="font-size:0.78rem;color:var(--error)">${clip.error}</span>` : ''}
+              </div>
+            </div>`;
+        });
+      }
+
+      list.innerHTML = html;
+    }
+
+    function toggleClipSelection(idx) {
+      if (mergeClipList[idx]) {
+        mergeClipList[idx].selected = !mergeClipList[idx].selected;
+        rerenderClipList();
+      }
+    }
+
+    function moveClip(idx, direction) {
+      const target = idx + direction;
+      if (target < 0 || target >= mergeClipList.length) return;
+      [mergeClipList[idx], mergeClipList[target]] = [mergeClipList[target], mergeClipList[idx]];
+      rerenderClipList();
     }
 
     function setStatus(status) {
@@ -934,26 +1259,84 @@
       const container = document.getElementById('result-segments');
       if (!segments.length) { container.innerHTML = ''; return; }
 
-      const cited = segments.filter(s => s.cited);
-      const uncited = segments.filter(s => !s.cited);
+      const cited        = segments.filter(s => s.cited);
+      const uncited      = segments.filter(s => !s.cited);
+
+      // 미디어(영상/음성) vs 문서(pptx, pdf 등) 분리
+      const citedMedia   = cited.filter(s => isMediaFile(s.source_file));
+      const citedDocs    = cited.filter(s => !isMediaFile(s.source_file));
+      const uncitedMedia = uncited.filter(s => isMediaFile(s.source_file));
+      const uncitedDocs  = uncited.filter(s => !isMediaFile(s.source_file));
 
       let html = '';
-      if (cited.length) {
+
+      // ── 인용된 영상/음성 출처 ──────────────────────────────────────────
+      if (citedMedia.length) {
         html += '<h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:1rem">인용된 출처</h4>';
-        html += cited.map(s => `
-          <div class="segment-item" style="border-left:3px solid var(--success)">
-            <div>
-              <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600;margin-right:0.5rem">${s.citation_tag || ''}</span>
-              <span class="segment-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
-              <span class="segment-source">${s.source_file || ''}</span>
-            </div>
-            <span class="segment-score">${s.relevance_score ? (s.relevance_score * 100).toFixed(1) + '%' : '-'}</span>
-          </div>
-        `).join('');
+        html += citedMedia.map(s => {
+          const tag = (s.citation_tag || '').replace(/"/g, '&quot;');
+          const offsetRow = `
+            <div class="seg-offset-row" data-tag="${tag}" style="display:flex;align-items:center;gap:0.45rem;flex-wrap:wrap;margin-top:0.45rem">
+              <span style="font-size:0.75rem;color:var(--text-muted);opacity:0.8">⏱ 시간 조절</span>
+              <span style="font-size:0.78rem;color:var(--text-muted)">시작</span>
+              <input type="number" class="time-adj-input seg-start-offset" value="0" min="-30" max="30" step="0.5"
+                style="width:54px" title="시작 시간 조절 (음수: 앞으로, 양수: 뒤로)">
+              <span style="font-size:0.78rem;color:var(--text-muted)">초 &nbsp; 종료</span>
+              <input type="number" class="time-adj-input seg-end-offset" value="0" min="-30" max="30" step="0.5"
+                style="width:54px" title="종료 시간 조절 (음수: 앞으로, 양수: 뒤로)">
+              <span style="font-size:0.75rem;color:var(--text-muted)">초
+                <span style="opacity:0.6">(음수: 앞으로 / 양수: 뒤로)</span>
+              </span>
+            </div>`;
+          return `
+            <div class="segment-item" style="border-left:3px solid var(--success);flex-direction:column;align-items:stretch;gap:0">
+              <div style="display:flex;justify-content:space-between;align-items:center">
+                <div>
+                  <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600;margin-right:0.5rem">${s.citation_tag || ''}</span>
+                  <span class="segment-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
+                  <span class="segment-source">${s.source_file || ''}</span>
+                </div>
+                <span class="segment-score">${s.relevance_score ? (s.relevance_score * 100).toFixed(1) + '%' : '-'}</span>
+              </div>
+              ${offsetRow}
+            </div>`;
+        }).join('');
       }
-      if (uncited.length) {
+
+      // ── 인용된 문서/슬라이드 — 접을 수 있는 별도 섹션 ──────────────────
+      if (citedDocs.length) {
+        const docsHtml = citedDocs.map(s => `
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            padding:0.5rem 0.8rem;border-bottom:1px solid var(--border);font-size:0.84rem">
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;min-width:0">
+              <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.73rem;font-weight:600;flex-shrink:0">${s.citation_tag || ''}</span>
+              <span style="color:var(--accent);font-family:monospace;font-size:0.82rem;flex-shrink:0">${s.start_time || '?'}${s.end_time && s.end_time !== s.start_time ? ' ~ ' + s.end_time : ''}</span>
+              <span style="color:var(--text-muted);font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.source_file || ''}</span>
+            </div>
+            <span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:10px;font-size:0.75rem;flex-shrink:0">
+              ${s.relevance_score ? (s.relevance_score * 100).toFixed(1) + '%' : '-'}
+            </span>
+          </div>`).join('');
+
+        html += `
+          <details style="margin-top:0.8rem" open>
+            <summary style="cursor:pointer;font-size:0.82rem;color:var(--text-muted);
+              padding:0.4rem 0.2rem;list-style:none;display:flex;align-items:center;gap:0.4rem;
+              user-select:none" onclick="this.parentElement.querySelector('.doc-list').style.display = this.parentElement.open ? 'none' : 'block'">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              슬라이드/문서 참조
+              <span style="background:var(--border);color:var(--text-muted);padding:0.05rem 0.4rem;border-radius:10px;font-size:0.73rem">${citedDocs.length}</span>
+            </summary>
+            <div class="doc-list" style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:0.4rem">
+              ${docsHtml}
+            </div>
+          </details>`;
+      }
+
+      // ── 검색되었으나 미인용 (영상/음성만 표시) ───────────────────────────
+      if (uncitedMedia.length) {
         html += '<h4 style="font-size:0.85rem;color:var(--text-muted);margin-bottom:0.5rem;margin-top:1rem">검색되었으나 미인용</h4>';
-        html += uncited.map(s => `
+        html += uncitedMedia.map(s => `
           <div class="segment-item" style="opacity:0.5">
             <div>
               <span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600;margin-right:0.5rem">${s.citation_tag || ''}</span>
@@ -964,6 +1347,33 @@
           </div>
         `).join('');
       }
+
+      // 미인용 문서도 접힌 섹션으로
+      if (uncitedDocs.length) {
+        const udocsHtml = uncitedDocs.map(s => `
+          <div style="display:flex;justify-content:space-between;align-items:center;
+            padding:0.5rem 0.8rem;border-bottom:1px solid var(--border);font-size:0.84rem;opacity:0.5">
+            <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;min-width:0">
+              <span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.73rem;font-weight:600;flex-shrink:0">${s.citation_tag || ''}</span>
+              <span style="color:var(--text-muted);font-family:monospace;font-size:0.82rem;flex-shrink:0">${s.start_time || '?'}${s.end_time && s.end_time !== s.start_time ? ' ~ ' + s.end_time : ''}</span>
+              <span style="color:var(--text-muted);font-size:0.8rem;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${s.source_file || ''}</span>
+            </div>
+          </div>`).join('');
+
+        html += `
+          <details style="margin-top:0.5rem">
+            <summary style="cursor:pointer;font-size:0.82rem;color:var(--text-muted);opacity:0.6;
+              padding:0.3rem 0.2rem;list-style:none;display:flex;align-items:center;gap:0.4rem;user-select:none">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              미인용 문서
+              <span style="background:var(--border);color:var(--text-muted);padding:0.05rem 0.4rem;border-radius:10px;font-size:0.73rem">${uncitedDocs.length}</span>
+            </summary>
+            <div style="border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-top:0.4rem">
+              ${udocsHtml}
+            </div>
+          </details>`;
+      }
+
       container.innerHTML = html;
     }
 
@@ -977,6 +1387,116 @@
           <button class="btn btn-sm btn-danger" onclick="this.closest('.segment-row').remove()">삭제</button>
         </div>`;
       document.getElementById('segments-container').insertAdjacentHTML('beforeend', html);
+    }
+
+    function toggleJsonPaste(btn) {
+      const body = document.getElementById('json-paste-body');
+      const collapsed = body.style.display === 'none';
+      body.style.display = collapsed ? 'block' : 'none';
+      btn.textContent   = collapsed ? '접기 ▲' : '펼치기 ▼';
+    }
+
+    function previewJsonPaste() {
+      const text    = document.getElementById('json-paste-input').value.trim();
+      const preview = document.getElementById('json-paste-preview');
+      if (!text) { preview.style.display = 'none'; return; }
+      try {
+        const data    = JSON.parse(text);
+        const title   = data.title || '(제목 없음)';
+        const src     = data.source_file || '(파일명 없음)';
+        const segs    = Array.isArray(data.segments) ? data.segments.length : 0;
+        const desc    = data.description ? `<span style="color:var(--text-muted)"> · ${escapeHtml(data.description)}</span>` : '';
+        preview.style.display = 'block';
+        preview.innerHTML = `
+          <span style="color:var(--success)">✓ 파싱 성공</span> &nbsp;
+          <strong>${escapeHtml(title)}</strong>${desc}<br>
+          <span style="color:var(--text-muted);font-size:0.8rem">${escapeHtml(src)} · 세그먼트 <strong style="color:var(--accent)">${segs}</strong>개</span>`;
+      } catch (e) {
+        preview.style.display = 'block';
+        preview.innerHTML = `<span style="color:var(--error)">✗ JSON 오류: ${escapeHtml(e.message)}</span>`;
+      }
+    }
+
+    async function submitJsonPaste() {
+      const text = document.getElementById('json-paste-input').value.trim();
+      if (!text) { toast('JSON 텍스트를 입력하세요.', 'error'); return; }
+      let data;
+      try { data = JSON.parse(text); }
+      catch (e) { toast('JSON 파싱 오류: ' + e.message, 'error'); return; }
+
+      const btns = document.querySelectorAll('#json-paste-body .btn-primary');
+      btns.forEach(b => { b.disabled = true; b.textContent = '업로드 중...'; });
+
+      try {
+        const res    = await fetch(API + '/api/lectures/bulk-import/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data),
+        });
+        const result = await res.json();
+        btns.forEach(b => { b.disabled = false; b.textContent = '업로드'; });
+
+        if (res.ok) {
+          if (result.total !== undefined) {
+            toast(`${result.success}개 강의 (총 ${result.results.reduce((a,r)=>a+(r.segments_count||0),0)}개 구간) 임포트 완료!`);
+            renderImportResult(result);
+          } else {
+            toast(`업로드 완료! ${result.segments_count}개 구간 등록됨`);
+          }
+          document.getElementById('json-paste-input').value = '';
+          document.getElementById('json-paste-preview').style.display = 'none';
+        } else {
+          toast('업로드 실패: ' + JSON.stringify(result), 'error');
+        }
+      } catch (e) {
+        toast('업로드 오류: ' + e.message, 'error');
+        btns.forEach(b => { b.disabled = false; b.textContent = '업로드'; });
+      }
+    }
+
+    function fillFormFromJson() {
+      const text = document.getElementById('json-paste-input').value.trim();
+      if (!text) { toast('JSON 텍스트를 입력하세요.', 'error'); return; }
+      let data;
+      try { data = JSON.parse(text); }
+      catch (e) { toast('JSON 파싱 오류: ' + e.message, 'error'); return; }
+
+      document.getElementById('u-title').value  = data.title        || '';
+      document.getElementById('u-source').value = data.source_file  || '';
+      document.getElementById('u-desc').value   = data.description  || '';
+
+      const segments  = Array.isArray(data.segments) ? data.segments : [];
+      const container = document.getElementById('segments-container');
+      container.innerHTML = '';
+
+      if (segments.length === 0) {
+        container.innerHTML = `
+          <div class="segment-row">
+            <input type="text" class="time-input seg-start" placeholder="00:00">
+            <span style="color:var(--text-muted);padding-top:0.5rem">~</span>
+            <input type="text" class="time-input seg-end" placeholder="00:00">
+            <textarea class="seg-text" placeholder="STT 텍스트..."></textarea>
+            <button class="btn btn-sm btn-danger" onclick="this.closest('.segment-row').remove()">삭제</button>
+          </div>`;
+      } else {
+        segments.forEach(s => {
+          const row     = document.createElement('div');
+          row.className = 'segment-row';
+          const start   = escapeHtml(s.start_time || '');
+          const end     = escapeHtml(s.end_time   || '');
+          const text2   = escapeHtml(s.transcript || '');
+          row.innerHTML = `
+            <input type="text" class="time-input seg-start" value="${start}" placeholder="00:00">
+            <span style="color:var(--text-muted);padding-top:0.5rem">~</span>
+            <input type="text" class="time-input seg-end" value="${end}" placeholder="00:00">
+            <textarea class="seg-text">${text2}</textarea>
+            <button class="btn btn-sm btn-danger" onclick="this.closest('.segment-row').remove()">삭제</button>`;
+          container.appendChild(row);
+        });
+      }
+
+      toast(`${segments.length}개 구간이 아래 폼에 채워졌습니다.`);
+      document.querySelector('.manual-form:last-of-type').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     async function submitUpload() {
@@ -1105,20 +1625,32 @@
         }
         list.innerHTML = `<div style="padding:0.5rem 1.5rem;color:var(--text-muted);font-size:0.85rem;border-bottom:1px solid var(--border)">총 ${lectures.length}개 강의 (클릭하여 구간 내용 확인)</div>` +
           lectures.map(l => `
-          <div class="lecture-card" onclick="toggleSegments(this, ${l.id})">
+          <div class="lecture-card" id="lec-card-${l.id}" onclick="handleLectureCardClick(event, this, ${l.id})">
             <div class="lecture-card-header">
               <div class="lecture-info">
                 <h4>${l.title}</h4>
                 <p>${l.source_file} · ${l.segment_count || 0}개 구간 · ${new Date(l.created_at).toLocaleDateString('ko-KR')}</p>
               </div>
-              <span class="badge ${l.is_indexed ? 'badge-indexed' : 'badge-pending'}">${l.is_indexed ? '인덱싱 완료' : '인덱싱 대기'}</span>
+              <div style="display:flex;align-items:center;gap:0.5rem">
+                ${isMediaFile(l.source_file) ? `<button id="lec-clip-btn-${l.id}" class="btn-lec-clip-edit" onclick="event.stopPropagation();toggleLectureClipMode(${l.id})">✂ 클립 편집</button>` : ''}
+                <span class="badge ${l.is_indexed ? 'badge-indexed' : 'badge-pending'}">${l.is_indexed ? '인덱싱 완료' : '인덱싱 대기'}</span>
+              </div>
             </div>
             <div class="lecture-segments" id="segs-${l.id}"></div>
+            <div id="lec-clip-panel-${l.id}" class="lec-clip-panel" style="display:none"></div>
           </div>
         `).join('');
       } catch (e) {
         list.innerHTML = '<div class="empty-state">로딩 실패</div>';
       }
+    }
+
+    // ── 강의 카드 클릭 핸들러 ──
+    function handleLectureCardClick(event, card, lectureId) {
+      // 클립 편집 모드 중엔 카드 클릭으로 세그먼트 토글 방지
+      const session = getLectureSession(lectureId);
+      if (session.clipMode) return;
+      toggleSegments(card, lectureId);
     }
 
     async function toggleSegments(card, lectureId) {
@@ -1127,9 +1659,11 @@
         container.classList.remove('open');
         return;
       }
-
       if (container.dataset.loaded) {
         container.classList.add('open');
+        // 클립 모드가 켜져 있으면 체크박스 재적용
+        const s = getLectureSession(lectureId);
+        if (s.clipMode) _applyCheckboxes(lectureId);
         return;
       }
 
@@ -1138,20 +1672,496 @@
 
       try {
         const segments = await fetchAllPages(API + '/api/lectures/' + lectureId + '/segments/');
-        if (!segments.length) {
-          container.innerHTML = '<div style="padding:0.8rem;text-align:center;color:var(--text-muted)">세그먼트 없음</div>';
-        } else {
-          container.innerHTML = segments.map((s, i) => `
-            <div class="lecture-seg-row">
-              <span style="color:var(--text-muted);font-size:0.75rem;min-width:25px">${i + 1}</span>
-              <span class="lecture-seg-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
-              <span class="lecture-seg-text">${escapeHtml(s.transcript || '')}</span>
-            </div>
-          `).join('');
-        }
+        const session  = getLectureSession(lectureId);
+        session.allSegments = segments;
+        _renderSegRows(lectureId, segments);
         container.dataset.loaded = '1';
+        if (session.clipMode) _applyCheckboxes(lectureId);
       } catch (e) {
         container.innerHTML = '<div style="padding:0.8rem;color:var(--error)">로딩 실패</div>';
+      }
+    }
+
+    function _renderSegRows(lectureId, segments) {
+      const container = document.getElementById('segs-' + lectureId);
+      if (!segments.length) {
+        container.innerHTML = '<div style="padding:0.8rem;text-align:center;color:var(--text-muted)">세그먼트 없음</div>';
+        return;
+      }
+      container.innerHTML = segments.map((s, i) => `
+        <div class="lecture-seg-row" id="segrow-${s.id}" data-seg-id="${s.id}">
+          <span style="color:var(--text-muted);font-size:0.75rem;min-width:25px">${i + 1}</span>
+          <span class="lecture-seg-time">${s.start_time || '?'} ~ ${s.end_time || '?'}</span>
+          <span class="lecture-seg-text">${escapeHtml(s.transcript || '')}</span>
+        </div>
+      `).join('');
+    }
+
+    // ── 강의 클립 세션 상태 ──────────────────────────────────────────────
+    const _lecSessions = {};
+
+    function getLectureSession(lectureId) {
+      if (!_lecSessions[lectureId]) {
+        _lecSessions[lectureId] = {
+          clipMode: false,
+          selectedIds: new Set(),
+          allSegments: [],
+          queryId: null,
+          mergeClipList: [],
+          allLastClips: [],
+          clipPollTimer: null,
+          mergePollTimer: null,
+        };
+      }
+      return _lecSessions[lectureId];
+    }
+
+    // ── 클립 편집 모드 토글 ──────────────────────────────────────────────
+    async function toggleLectureClipMode(lectureId) {
+      const session   = getLectureSession(lectureId);
+      const container = document.getElementById('segs-' + lectureId);
+      const panel     = document.getElementById('lec-clip-panel-' + lectureId);
+      const btn       = document.getElementById('lec-clip-btn-' + lectureId);
+      if (!btn) return;
+
+      if (!session.clipMode) {
+        // 세그먼트 먼저 로드
+        if (!container.dataset.loaded) {
+          container.innerHTML = '<div style="padding:1rem;text-align:center;color:var(--text-muted)"><span class="spinner"></span> 세그먼트 불러오는 중...</div>';
+          container.classList.add('open');
+          try {
+            const segs = await fetchAllPages(API + '/api/lectures/' + lectureId + '/segments/');
+            session.allSegments = segs;
+            _renderSegRows(lectureId, segs);
+            container.dataset.loaded = '1';
+          } catch (e) {
+            container.innerHTML = '<div style="padding:0.8rem;color:var(--error)">로딩 실패</div>';
+            return;
+          }
+        } else {
+          container.classList.add('open');
+        }
+
+        session.clipMode = true;
+        _applyCheckboxes(lectureId);
+
+        // 편집 패널 렌더링
+        panel.style.display = 'block';
+        _renderLecClipPanel(lectureId);
+
+        btn.textContent = '✗ 편집 종료';
+        btn.classList.add('active');
+      } else {
+        // 편집 모드 종료
+        session.clipMode = false;
+        session.selectedIds.clear();
+        _removeCheckboxes(lectureId);
+
+        // 클립 결과가 없으면 패널도 숨김
+        if (!session.queryId) panel.style.display = 'none';
+
+        btn.textContent = '✂ 클립 편집';
+        btn.classList.remove('active');
+      }
+    }
+
+    function _applyCheckboxes(lectureId) {
+      const session   = getLectureSession(lectureId);
+      const container = document.getElementById('segs-' + lectureId);
+      container.querySelectorAll('.lecture-seg-row').forEach(row => {
+        if (row.querySelector('.lec-seg-chk')) return;
+        const segId = parseInt(row.dataset.segId);
+        if (!segId) return;
+
+        const chk = document.createElement('input');
+        chk.type      = 'checkbox';
+        chk.className = 'lec-seg-chk';
+        chk.checked   = session.selectedIds.has(segId);
+        chk.addEventListener('change', (e) => {
+          e.stopPropagation();
+          if (chk.checked) session.selectedIds.add(segId);
+          else             session.selectedIds.delete(segId);
+          row.classList.toggle('selected', chk.checked);
+          _updateSelCount(lectureId);
+        });
+        row.insertBefore(chk, row.firstChild);
+        row.classList.add('clip-mode');
+        if (session.selectedIds.has(segId)) row.classList.add('selected');
+
+        row.addEventListener('click', function rowClick(e) {
+          if (e.target === chk) return;
+          chk.click();
+        });
+      });
+    }
+
+    function _removeCheckboxes(lectureId) {
+      const container = document.getElementById('segs-' + lectureId);
+      container.querySelectorAll('.lecture-seg-row').forEach(row => {
+        row.querySelector('.lec-seg-chk')?.remove();
+        row.classList.remove('clip-mode', 'selected');
+      });
+    }
+
+    function _updateSelCount(lectureId) {
+      const session  = getLectureSession(lectureId);
+      const countEl  = document.getElementById('lec-sel-count-' + lectureId);
+      const clipBtn  = document.getElementById('lec-do-clip-' + lectureId);
+      const n        = session.selectedIds.size;
+      if (countEl) countEl.textContent = n + '개 선택';
+      if (clipBtn) {
+        clipBtn.disabled    = n === 0;
+        clipBtn.textContent = n === 0 ? '✂ 구간을 선택하세요' : '✂ ' + n + '개 클립 만들기';
+      }
+    }
+
+    // ── 클립 편집 패널 HTML ───────────────────────────────────────────────
+    function _renderLecClipPanel(lectureId) {
+      const panel = document.getElementById('lec-clip-panel-' + lectureId);
+      const existing = panel.querySelector('#lec-clip-results-' + lectureId);
+      const resultHtml = existing ? existing.outerHTML : '';
+
+      panel.innerHTML = `
+        <div>
+          <!-- 선택 카운터 + 전체 선택/해제 -->
+          <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:0.5rem;margin-bottom:0.8rem">
+            <div style="display:flex;align-items:center;gap:0.6rem">
+              <span style="font-size:0.82rem;color:var(--text-muted)">선택된 구간:</span>
+              <span id="lec-sel-count-${lectureId}" style="font-size:0.85rem;font-weight:600;color:var(--accent)">0개 선택</span>
+            </div>
+            <div style="display:flex;gap:0.4rem">
+              <button class="btn btn-sm btn-ghost" style="font-size:0.78rem;padding:0.25rem 0.5rem" onclick="lecSelectAll(${lectureId})">전체 선택</button>
+              <button class="btn btn-sm btn-ghost" style="font-size:0.78rem;padding:0.25rem 0.5rem" onclick="lecDeselectAll(${lectureId})">전체 해제</button>
+            </div>
+          </div>
+
+          <!-- 클립 옵션 -->
+          <div class="lec-clip-opts">
+            <label class="clip-opts-label">
+              <input type="checkbox" id="lec-sub-${lectureId}" checked style="accent-color:var(--accent);width:13px;height:13px"> 자막
+            </label>
+            <div class="clip-opts-sep"></div>
+            <label class="clip-opts-label">
+              <input type="checkbox" id="lec-title-${lectureId}" style="accent-color:var(--accent);width:13px;height:13px"
+                onchange="lecToggleTitlePos(${lectureId})"> 강의명
+            </label>
+            <div id="lec-title-pos-${lectureId}" class="title-pos-group" style="display:none">
+              <label><input type="radio" name="lec-tp-${lectureId}" value="left"> 왼쪽</label>
+              <label><input type="radio" name="lec-tp-${lectureId}" value="center"> 가운데</label>
+              <label><input type="radio" name="lec-tp-${lectureId}" value="right" checked> 오른쪽</label>
+            </div>
+            <div class="clip-opts-sep"></div>
+            <select id="lec-ratio-${lectureId}" style="padding:0.3rem 0.5rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:0.82rem">
+              <option value="">원본 비율</option>
+              <option value="16:9">16:9</option>
+              <option value="9:16">9:16 (쇼츠)</option>
+              <option value="1:1">1:1</option>
+              <option value="4:3">4:3</option>
+            </select>
+            <button id="lec-do-clip-${lectureId}" class="btn btn-accent btn-sm" disabled
+              onclick="triggerLecClip(${lectureId})"
+              style="font-size:0.82rem;padding:0.35rem 0.9rem;margin-left:auto">
+              ✂ 구간을 선택하세요
+            </button>
+          </div>
+
+          <!-- 클립 결과 영역 (보존) -->
+          ${resultHtml || '<div id="lec-clip-results-' + lectureId + '" style="display:none"></div>'}
+        </div>
+      `;
+
+      // 기존 선택 카운트 동기화
+      _updateSelCount(lectureId);
+    }
+
+    function lecToggleTitlePos(lectureId) {
+      const checked = document.getElementById('lec-title-' + lectureId)?.checked;
+      const el = document.getElementById('lec-title-pos-' + lectureId);
+      if (el) el.style.display = checked ? 'flex' : 'none';
+    }
+
+    function lecSelectAll(lectureId) {
+      const session   = getLectureSession(lectureId);
+      const container = document.getElementById('segs-' + lectureId);
+      container.querySelectorAll('.lec-seg-chk').forEach(chk => {
+        const segId = parseInt(chk.closest('.lecture-seg-row').dataset.segId);
+        if (segId) {
+          chk.checked = true;
+          session.selectedIds.add(segId);
+          chk.closest('.lecture-seg-row').classList.add('selected');
+        }
+      });
+      _updateSelCount(lectureId);
+    }
+
+    function lecDeselectAll(lectureId) {
+      const session   = getLectureSession(lectureId);
+      const container = document.getElementById('segs-' + lectureId);
+      container.querySelectorAll('.lec-seg-chk').forEach(chk => {
+        chk.checked = false;
+        chk.closest('.lecture-seg-row')?.classList.remove('selected');
+      });
+      session.selectedIds.clear();
+      _updateSelCount(lectureId);
+    }
+
+    // ── 클립 생성 트리거 ─────────────────────────────────────────────────
+    async function triggerLecClip(lectureId) {
+      const session = getLectureSession(lectureId);
+      if (session.selectedIds.size === 0) { toast('클립할 구간을 선택하세요.', 'error'); return; }
+
+      const btn        = document.getElementById('lec-do-clip-' + lectureId);
+      const resultsDiv = document.getElementById('lec-clip-results-' + lectureId);
+
+      btn.disabled    = true;
+      btn.textContent = '⏳ 생성 중...';
+      resultsDiv.style.display = 'block';
+      resultsDiv.innerHTML     = '<div class="clip-loading"><span class="spinner"></span> 클립을 생성 중입니다...</div>';
+
+      session.mergeClipList = [];
+      session.allLastClips  = [];
+
+      const ratio       = document.getElementById('lec-ratio-' + lectureId)?.value || null;
+      const withSubs    = document.getElementById('lec-sub-' + lectureId)?.checked ?? true;
+      const withTitle   = document.getElementById('lec-title-' + lectureId)?.checked ?? false;
+      const titlePos    = document.querySelector('input[name="lec-tp-' + lectureId + '"]:checked')?.value || 'right';
+
+      try {
+        const res = await fetch(API + '/api/llm/manual-clip/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({
+            segment_ids:   Array.from(session.selectedIds),
+            aspect_ratio:  ratio || null,
+            with_subtitles: withSubs,
+            with_title:     withTitle,
+            title_position: titlePos,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          resultsDiv.innerHTML = `<div style="color:var(--error);font-size:0.85rem">오류: ${data.error || res.status}</div>`;
+          btn.disabled    = false;
+          btn.textContent = '✂ ' + session.selectedIds.size + '개 클립 만들기';
+          return;
+        }
+        session.queryId = data.query_id;
+        _startLecClipPoll(lectureId, data.query_id, 0);
+      } catch (e) {
+        resultsDiv.innerHTML = `<div style="color:var(--error);font-size:0.85rem">요청 실패: ${e.message}</div>`;
+        btn.disabled    = false;
+        btn.textContent = '✂ ' + session.selectedIds.size + '개 클립 만들기';
+      }
+    }
+
+    function _startLecClipPoll(lectureId, queryId, attempt) {
+      const session = getLectureSession(lectureId);
+      clearTimeout(session.clipPollTimer);
+      if (attempt >= 90) {
+        document.getElementById('lec-clip-results-' + lectureId).innerHTML =
+          '<div style="color:var(--text-muted);font-size:0.85rem">클립 생성 시간 초과</div>';
+        const btn = document.getElementById('lec-do-clip-' + lectureId);
+        if (btn) { btn.disabled = false; btn.textContent = '✂ ' + session.selectedIds.size + '개 클립 만들기'; }
+        return;
+      }
+      session.clipPollTimer = setTimeout(async () => {
+        try {
+          const res  = await fetch(API + '/api/llm/query/' + queryId + '/');
+          const data = await res.json();
+          if (data.video_clips && data.video_clips.length > 0) {
+            _renderLecClips(lectureId, data.video_clips);
+            const btn = document.getElementById('lec-do-clip-' + lectureId);
+            if (btn) { btn.disabled = false; btn.textContent = '✂ ' + session.selectedIds.size + '개 클립 만들기'; }
+          } else {
+            _startLecClipPoll(lectureId, queryId, attempt + 1);
+          }
+        } catch (e) { _startLecClipPoll(lectureId, queryId, attempt + 1); }
+      }, 2500);
+    }
+
+    // ── 클립 목록 렌더링 ─────────────────────────────────────────────────
+    function _renderLecClips(lectureId, clips) {
+      const session  = getLectureSession(lectureId);
+      session.allLastClips = clips;
+
+      const successClips = clips.filter(c => c.status === 'success');
+      // 새 클립은 mergeClipList에 추가 (기존 없으면 초기화)
+      if (session.mergeClipList.length === 0) {
+        session.mergeClipList = successClips.map(c => ({ clip: c, selected: true }));
+      } else {
+        const existing = new Set(session.mergeClipList.map(it => it.clip.clip_filename));
+        successClips.filter(c => !existing.has(c.clip_filename))
+          .forEach(c => session.mergeClipList.push({ clip: c, selected: true }));
+      }
+
+      const resultsDiv = document.getElementById('lec-clip-results-' + lectureId);
+      resultsDiv.style.display = 'block';
+
+      const selCount = session.mergeClipList.filter(it => it.selected).length;
+      let html = '';
+
+      if (session.mergeClipList.length > 0) {
+        html += `<div class="merge-count-info" style="margin-top:0.5rem">머지 대상: <strong>${selCount}</strong> / ${session.mergeClipList.length}개 선택됨</div>`;
+      }
+
+      // 성공 클립 (체크박스 + 순서 조절)
+      session.mergeClipList.forEach(({ clip, selected }, idx) => {
+        const isFirst = idx === 0;
+        const isLast  = idx === session.mergeClipList.length - 1;
+        html += `
+          <div class="clip-card clip-success" style="${!selected ? 'opacity:0.5' : ''}">
+            <div class="clip-order-controls">
+              <input type="checkbox" class="clip-checkbox" ${selected ? 'checked' : ''}
+                onchange="lecToggleClipSel(${lectureId},${idx})" title="머지에 포함">
+              <button class="btn-order" onclick="lecMoveClip(${lectureId},${idx},-1)" ${isFirst ? 'disabled' : ''}>▲</button>
+              <span class="clip-order-num">#${idx + 1}</span>
+              <button class="btn-order" onclick="lecMoveClip(${lectureId},${idx},1)" ${isLast ? 'disabled' : ''}>▼</button>
+            </div>
+            <div class="clip-info">
+              <div class="clip-meta">
+                <span style="background:var(--primary);color:#fff;padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem;font-weight:600">${clip.citation_tag || ''}</span>
+                <span class="clip-time">${clip.start_time || '?'} ~ ${clip.end_time || '?'}</span>
+                <span class="clip-status clip-status-success">완료</span>
+              </div>
+              <div class="clip-filename">${clip.source_file || ''}</div>
+              ${clip.clip_filename ? `<div style="font-size:0.78rem;color:var(--text-muted);font-family:monospace">${clip.clip_filename}</div>` : ''}
+            </div>
+            <div class="clip-actions">
+              ${clip.clip_url ? `<a class="btn-download" href="${clip.clip_url}" download="${clip.clip_filename || ''}">다운로드</a>` : ''}
+            </div>
+          </div>`;
+      });
+
+      // 실패 클립
+      clips.filter(c => c.status !== 'success').forEach(clip => {
+        html += `
+          <div class="clip-card clip-${clip.status}" style="opacity:0.65">
+            <div class="clip-info">
+              <div class="clip-meta">
+                <span style="background:var(--border);color:var(--text-muted);padding:0.1rem 0.4rem;border-radius:4px;font-size:0.75rem">${clip.citation_tag || ''}</span>
+                <span class="clip-time">${clip.start_time || '?'} ~ ${clip.end_time || '?'}</span>
+                <span class="clip-status clip-status-${clip.status}">${{not_found:'파일 없음',failed:'실패'}[clip.status] || clip.status}</span>
+              </div>
+              <div class="clip-filename">${clip.source_file || ''}</div>
+              ${clip.error ? `<span style="font-size:0.78rem;color:var(--error)">${clip.error}</span>` : ''}
+            </div>
+          </div>`;
+      });
+
+      // 머지 섹션
+      html += `
+        <div id="lec-merge-sec-${lectureId}" style="margin-top:1rem;border-top:1px solid var(--border);padding-top:0.8rem;${successClips.length === 0 ? 'display:none' : ''}">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.6rem">
+            <span style="font-size:0.82rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.05em">클립 합치기</span>
+            <button id="lec-btn-merge-${lectureId}" class="btn btn-sm"
+              onclick="triggerLecMerge(${lectureId})"
+              style="font-size:0.82rem;padding:0.35rem 0.9rem;background:var(--primary);color:#fff">
+              ⛓ 클립 합치기
+            </button>
+          </div>
+          <div id="lec-merge-result-${lectureId}"></div>
+        </div>`;
+
+      resultsDiv.innerHTML = html;
+    }
+
+    function lecToggleClipSel(lectureId, idx) {
+      const session = getLectureSession(lectureId);
+      if (session.mergeClipList[idx]) {
+        session.mergeClipList[idx].selected = !session.mergeClipList[idx].selected;
+        _renderLecClips(lectureId, session.allLastClips);
+      }
+    }
+
+    function lecMoveClip(lectureId, idx, dir) {
+      const session = getLectureSession(lectureId);
+      const target  = idx + dir;
+      if (target < 0 || target >= session.mergeClipList.length) return;
+      [session.mergeClipList[idx], session.mergeClipList[target]] =
+        [session.mergeClipList[target], session.mergeClipList[idx]];
+      _renderLecClips(lectureId, session.allLastClips);
+    }
+
+    // ── 머지 트리거 ──────────────────────────────────────────────────────
+    async function triggerLecMerge(lectureId) {
+      const session = getLectureSession(lectureId);
+      if (!session.queryId) return;
+
+      const selFns = session.mergeClipList
+        .filter(it => it.selected && it.clip.clip_filename)
+        .map(it => it.clip.clip_filename);
+
+      if (selFns.length === 0) { toast('머지할 클립을 1개 이상 선택하세요.', 'error'); return; }
+
+      const btn    = document.getElementById('lec-btn-merge-' + lectureId);
+      const resDiv = document.getElementById('lec-merge-result-' + lectureId);
+
+      btn.disabled    = true;
+      btn.textContent = '⏳ 합치는 중...';
+      resDiv.innerHTML = '<div class="clip-loading"><span class="spinner"></span> 클립을 합치는 중...</div>';
+
+      try {
+        const res = await fetch(API + '/api/llm/query/' + session.queryId + '/merge/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrfToken() },
+          body: JSON.stringify({ selected_clips: selFns }),
+        });
+        if (!res.ok) {
+          const err = await res.json();
+          resDiv.innerHTML = `<div style="color:var(--error);font-size:0.85rem">오류: ${err.error || res.status}</div>`;
+          btn.disabled = false; btn.textContent = '⛓ 클립 합치기';
+          return;
+        }
+        _startLecMergePoll(lectureId, session.queryId, 0);
+      } catch (e) {
+        resDiv.innerHTML = `<div style="color:var(--error);font-size:0.85rem">요청 실패: ${e.message}</div>`;
+        btn.disabled = false; btn.textContent = '⛓ 클립 합치기';
+      }
+    }
+
+    function _startLecMergePoll(lectureId, queryId, attempt) {
+      const session = getLectureSession(lectureId);
+      clearTimeout(session.mergePollTimer);
+      if (attempt >= 90) {
+        const resDiv = document.getElementById('lec-merge-result-' + lectureId);
+        if (resDiv) resDiv.innerHTML = '<div style="color:var(--text-muted);font-size:0.85rem">머지 시간 초과</div>';
+        const btn = document.getElementById('lec-btn-merge-' + lectureId);
+        if (btn) { btn.disabled = false; btn.textContent = '⛓ 클립 합치기'; }
+        return;
+      }
+      session.mergePollTimer = setTimeout(async () => {
+        try {
+          const res  = await fetch(API + '/api/llm/query/' + queryId + '/');
+          const data = await res.json();
+          if (data.merged_clip && data.merged_clip.status) {
+            _renderLecMergeResult(lectureId, data.merged_clip);
+            const btn = document.getElementById('lec-btn-merge-' + lectureId);
+            if (btn) { btn.disabled = false; btn.textContent = '⛓ 클립 합치기'; }
+          } else {
+            _startLecMergePoll(lectureId, queryId, attempt + 1);
+          }
+        } catch (e) { _startLecMergePoll(lectureId, queryId, attempt + 1); }
+      }, 2500);
+    }
+
+    function _renderLecMergeResult(lectureId, merged) {
+      const el = document.getElementById('lec-merge-result-' + lectureId);
+      if (!el) return;
+      if (merged.status === 'success') {
+        el.innerHTML = `
+          <div class="clip-card clip-success">
+            <div class="clip-info">
+              <div class="clip-meta">
+                <span class="clip-status clip-status-success">완료</span>
+              </div>
+              <div class="clip-filename">${merged.merged_filename || ''}</div>
+            </div>
+            <div class="clip-actions">
+              <a class="btn-download" href="${merged.merged_url}" download="${merged.merged_filename || ''}">다운로드</a>
+            </div>
+          </div>`;
+      } else {
+        el.innerHTML = `<div style="color:var(--error);font-size:0.85rem">머지 실패: ${merged.error || merged.status}</div>`;
       }
     }
 

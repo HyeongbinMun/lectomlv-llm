@@ -71,19 +71,28 @@ def process_llm_query(self, query_id: int, lecture_id: int | None = None):
 
 
 @shared_task(bind=True, max_retries=1)
-def merge_video_clips(self, query_id: int):
+def merge_video_clips(self, query_id: int, selected_filenames: list[str] | None = None):
     """
     query 의 video_clips 중 성공한 클립들을 하나로 합침.
+    selected_filenames 가 주어지면 해당 클립만 지정 순서로 머지.
     완료 후 LLMQuery.merged_clip 필드를 업데이트한다.
     """
     from apps.llm.models import LLMQuery
     from apps.llm.services.video_clip_service import VideoClipService
 
-    logger.info("Query %d: 클립 머지 시작", query_id)
+    logger.info(
+        "Query %d: 클립 머지 시작 (선택=%s)",
+        query_id,
+        len(selected_filenames) if selected_filenames else "전체",
+    )
     try:
         query = LLMQuery.objects.get(pk=query_id)
         service = VideoClipService()
-        result = service.merge_clips(query.video_clips or [], query_id)
+        result = service.merge_clips(
+            query.video_clips or [],
+            query_id,
+            selected_filenames=selected_filenames,
+        )
 
         LLMQuery.objects.filter(pk=query_id).update(merged_clip=result)
         logger.info("Query %d: 머지 완료 — status=%s", query_id, result.get("status"))
@@ -103,19 +112,28 @@ def clip_video_segments(
     cited_sources: list[dict],
     aspect_ratio: str | None = None,
     with_subtitles: bool = True,
+    with_title: bool = False,
+    title_position: str = "right",
+    start_offset_sec: float = 0.0,
+    end_offset_sec: float = 0.0,
 ):
     """
     RAG 인용 출처 중 영상 파일에 해당하는 구간을 ffmpeg으로 잘라 클립을 생성.
 
-    aspect_ratio : "16:9" | "9:16" | "1:1" | "4:3" | None (원본 유지)
-    with_subtitles : True이면 세그먼트 transcript를 자막으로 burn-in
+    aspect_ratio    : "16:9" | "9:16" | "1:1" | "4:3" | None (원본 유지)
+    with_subtitles  : True이면 세그먼트 transcript를 자막으로 burn-in
+    with_title      : True이면 강의명을 영상 상단에 오버레이
+    title_position  : "left" | "center" | "right"
+    start_offset_sec: 시작 시간 조정 (초, 음수=앞으로, 양수=뒤로)
+    end_offset_sec  : 종료 시간 조정 (초, 음수=앞으로, 양수=뒤로)
     """
     from apps.llm.models import LLMQuery
     from apps.llm.services.video_clip_service import VideoClipService
 
     logger.info(
-        "Query %d: 클리핑 시작 (%d개, ratio=%s, subtitle=%s)",
+        "Query %d: 클리핑 시작 (%d개, ratio=%s, subtitle=%s, title=%s[%s], offset=%+.1f/%+.1f)",
         query_id, len(cited_sources), aspect_ratio, with_subtitles,
+        with_title, title_position, start_offset_sec, end_offset_sec,
     )
     try:
         service = VideoClipService()
@@ -123,6 +141,10 @@ def clip_video_segments(
             cited_sources,
             aspect_ratio=aspect_ratio,
             with_subtitles=with_subtitles,
+            with_title=with_title,
+            title_position=title_position,
+            start_offset_sec=start_offset_sec,
+            end_offset_sec=end_offset_sec,
         )
 
         if not clips:

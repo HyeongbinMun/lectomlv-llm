@@ -12,4 +12,5 @@ urlpatterns = [
     path("queries/", views.LLMQueryListView.as_view(), name="query-list"),
     path("tasks/<str:task_id>/", views.TaskStatusView.as_view(), name="task-status"),
     path("models/", views.AvailableModelsView.as_view(), name="models"),
+    path("manual-clip/", views.ManualClipView.as_view(), name="manual-clip"),
 ]

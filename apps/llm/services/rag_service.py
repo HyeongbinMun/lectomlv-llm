@@ -168,6 +168,7 @@ class RAGService:
                 start_time = result.get("start_time", "?")
                 end_time = result.get("end_time", "?")
                 transcript = "(원문 없음)"
+                segment = None
 
             context_parts.append(
                 f"[{tag}] {source_file} | {start_time} ~ {end_time}\n{transcript}"
@@ -175,6 +176,7 @@ class RAGService:
             source_map[tag] = {
                 "segment_id": segment_id,
                 "lecture_id": result.get("lecture_id"),
+                "lecture_title": segment.lecture.title if segment is not None else "",
                 "source_file": source_file,
                 "start_time": start_time,
                 "end_time": end_time,
@@ -229,7 +231,7 @@ class RAGService:
     @staticmethod
     def _build_segment_list(citation_info: dict) -> list[dict]:
         fields = (
-            "segment_id", "lecture_id", "start_time", "end_time",
+            "segment_id", "lecture_id", "lecture_title", "start_time", "end_time",
             "source_file", "relevance_score", "citation_tag", "transcript",
         )
         segments = []

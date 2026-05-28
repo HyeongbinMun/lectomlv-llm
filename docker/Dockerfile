@@ -9,6 +9,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig \
     fonts-wqy-microhei \
+    ffmpeg \
     nodejs \
     npm \
     && fc-cache -f \

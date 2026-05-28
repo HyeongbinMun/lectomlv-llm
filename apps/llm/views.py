@@ -4,7 +4,7 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import LLMQuery, QueryStatus
+from .models import LLMQuery, QueryStatus, QueryType
 from .serializers import LLMQueryCreateSerializer, LLMQueryResultSerializer
 from .tasks import clip_video_segments, merge_video_clips, process_llm_query
 
@@ -122,20 +122,42 @@ class ClipVideoView(APIView):
         from apps.llm.services.video_clip_service import ASPECT_RATIO_PRESETS
         aspect_ratio   = request.data.get("aspect_ratio") or None
         with_subtitles = bool(request.data.get("with_subtitles", True))
+        with_title     = bool(request.data.get("with_title", False))
+        title_position = request.data.get("title_position", "right")
 
         if aspect_ratio and aspect_ratio not in ASPECT_RATIO_PRESETS:
             return Response(
                 {"error": f"지원하지 않는 비율입니다. 사용 가능: {list(ASPECT_RATIO_PRESETS)}"},
                 status=status.HTTP_400_BAD_REQUEST,
             )
+        if title_position not in ("left", "center", "right"):
+            title_position = "right"
+
+        # 클립별 개별 시간 오프셋 처리
+        segment_offsets_raw = request.data.get("segment_offsets") or []
+        offset_map = {
+            str(o.get("citation_tag", "")): o
+            for o in segment_offsets_raw
+            if isinstance(o, dict)
+        }
+        cited_sources_final = []
+        for src in cited_sources:
+            tag       = src.get("citation_tag", "")
+            per_src   = offset_map.get(tag, {})
+            modified  = dict(src)
+            modified["start_offset_sec"] = float(per_src.get("start_offset_sec", 0.0))
+            modified["end_offset_sec"]   = float(per_src.get("end_offset_sec",   0.0))
+            cited_sources_final.append(modified)
 
         query.video_clips = []
         query.save(update_fields=["video_clips"])
 
         task = clip_video_segments.delay(
-            query.id, cited_sources,
+            query.id, cited_sources_final,
             aspect_ratio=aspect_ratio,
             with_subtitles=with_subtitles,
+            with_title=with_title,
+            title_position=title_position,
         )
 
         return Response(
@@ -160,12 +182,111 @@ class MergeVideoView(APIView):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
+        selected_clips = request.data.get("selected_clips") or None
+        if selected_clips is not None and not isinstance(selected_clips, list):
+            return Response(
+                {"error": "selected_clips 는 파일명 배열이어야 합니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
         query.merged_clip = {}
         query.save(update_fields=["merged_clip"])
 
-        task = merge_video_clips.delay(query.id)
+        task = merge_video_clips.delay(query.id, selected_filenames=selected_clips)
 
         return Response(
             {"message": "머지가 시작되었습니다.", "task_id": task.id},
+            status=status.HTTP_202_ACCEPTED,
+        )
+
+
+class ManualClipView(APIView):
+    """강의 세그먼트를 직접 선택하여 클립 생성 (RAG 없이)"""
+
+    def post(self, request):
+        from apps.lectures.models import LectureSegment
+        from apps.llm.services.video_clip_service import ASPECT_RATIO_PRESETS, _is_video_file
+
+        segment_ids = request.data.get("segment_ids") or []
+        if not segment_ids:
+            return Response({"error": "segment_ids가 필요합니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # 입력 순서 보존
+        id_order = {int(sid): i for i, sid in enumerate(segment_ids)}
+        segments = sorted(
+            LectureSegment.objects.select_related("lecture").filter(id__in=segment_ids),
+            key=lambda s: id_order.get(s.id, 999),
+        )
+
+        if not segments:
+            return Response({"error": "유효한 세그먼트가 없습니다."}, status=status.HTTP_400_BAD_REQUEST)
+
+        # cited_sources 형태로 변환
+        cited_sources = [
+            {
+                "segment_id":   seg.id,
+                "lecture_id":   seg.lecture.id,
+                "lecture_title": seg.lecture.title,
+                "source_file":  seg.lecture.source_file,
+                "start_time":   seg.start_time,
+                "end_time":     seg.end_time,
+                "transcript":   seg.transcript,
+                "citation_tag": f"[M{i}]",
+                "cited":        True,
+            }
+            for i, seg in enumerate(segments, 1)
+        ]
+
+        video_sources = [s for s in cited_sources if _is_video_file(s["source_file"])]
+        if not video_sources:
+            return Response(
+                {"error": "선택된 세그먼트 중 영상 파일이 없습니다."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        # 클립 옵션
+        aspect_ratio   = request.data.get("aspect_ratio") or None
+        with_subtitles = bool(request.data.get("with_subtitles", True))
+        with_title     = bool(request.data.get("with_title", False))
+        title_position = request.data.get("title_position", "right")
+
+        if aspect_ratio and aspect_ratio not in ASPECT_RATIO_PRESETS:
+            return Response({"error": f"지원하지 않는 비율: {list(ASPECT_RATIO_PRESETS)}"}, status=status.HTTP_400_BAD_REQUEST)
+        if title_position not in ("left", "center", "right"):
+            title_position = "right"
+
+        # 세그먼트별 오프셋
+        segment_offsets_raw = request.data.get("segment_offsets") or []
+        offset_map = {str(o.get("citation_tag", "")): o for o in segment_offsets_raw if isinstance(o, dict)}
+        final_sources = []
+        for src in video_sources:
+            tag      = src.get("citation_tag", "")
+            per_src  = offset_map.get(tag, {})
+            modified = dict(src)
+            modified["start_offset_sec"] = float(per_src.get("start_offset_sec", 0.0))
+            modified["end_offset_sec"]   = float(per_src.get("end_offset_sec",   0.0))
+            final_sources.append(modified)
+
+        # 클립 전용 LLMQuery 생성 (RAG 없음, 바로 COMPLETED)
+        query = LLMQuery.objects.create(
+            query_text         = f"직접 선택 클립 ({len(final_sources)}개 구간)",
+            query_type         = QueryType.MANUAL_CLIP,
+            model_name         = "manual",
+            status             = QueryStatus.COMPLETED,
+            retrieved_segments = cited_sources,
+        )
+
+        task = clip_video_segments.delay(
+            query.id, final_sources,
+            aspect_ratio=aspect_ratio,
+            with_subtitles=with_subtitles,
+            with_title=with_title,
+            title_position=title_position,
+        )
+        query.task_id = task.id
+        query.save(update_fields=["task_id"])
+
+        return Response(
+            {"query_id": query.id, "task_id": task.id, "message": f"{len(final_sources)}개 클립 생성을 시작했습니다."},
             status=status.HTTP_202_ACCEPTED,
         )

@@ -11,11 +11,17 @@
 - **Grounded RAG** — 출처 기반 답변 생성, 모든 문장에 `[S#]` 인용 강제
 - **Faithfulness 검증** — LLM이 생성한 답변을 다시 검증하여 근거 없는 문장 탐지
 - **구간 검색 / 요약 / 추천** — 3가지 쿼리 유형 지원
-- **영상 클립 추출** — 인용된 영상 출처 구간을 ffmpeg으로 잘라 클립 생성
+- **영상 클립 추출** — 인용된 영상 구간을 ffmpeg으로 잘라 클립 생성
 - **자막 오버레이** — RAG 인용 transcript를 ASS 형식으로 변환하여 클립에 자막 삽입
+- **강의명 오버레이** — 클립 상단에 강의 제목 텍스트 표시 (좌/중/우 위치 선택)
 - **화면 비율 변환** — 16:9 / 9:16 / 1:1 / 4:3 중 원하는 비율로 클립 재인코딩
+- **클립 시간 미세 조정** — 클립별 시작/종료 시간을 초 단위로 개별 조정
+- **클립 선택 & 순서 변경** — 머지할 클립을 체크박스로 선택하고 순서 조절
 - **클립 머지** — 생성된 클립들을 하나의 mp4로 합치기
+- **직접 선택 클립** — RAG 없이 강의 세그먼트를 직접 선택하여 클립 생성 및 머지
 - **외부 JSON 자동 변환** — PPTX 슬라이드·영상 자막 등 다양한 형식 자동 감지 및 임포트
+- **JSON 직접 붙여넣기** — 강의 데이터 JSON을 웹 UI에서 직접 입력하여 업로드
+- **비디오/문서 분리 표시** — RAG 결과에서 영상·음성과 슬라이드·PDF를 별도 섹션으로 표시
 - **비동기 처리** — Celery Worker가 LLM 추론과 벡터 인덱싱을 백그라운드 수행
 - **데모 대시보드** — 브라우저에서 바로 쿼리·업로드·결과 확인 가능
 - **모델 확장 가능** — Ollama 지원 모델을 설정만으로 추가 가능
@@ -83,6 +89,10 @@ open http://localhost:8777/api/
 4. 결과 조회            GET  /api/llm/query/{id}/             → Grounded 답변 + 출처
 5. 영상 클립 자르기     POST /api/llm/query/{id}/clip/        → 인용 구간 ffmpeg 클리핑
 6. 클립 합치기          POST /api/llm/query/{id}/merge/       → 클립 하나로 머지
+
+직접 선택 클립 (RAG 없이)
+  POST /api/llm/manual-clip/                               → 세그먼트 ID로 바로 클립 생성
+  POST /api/llm/query/{id}/merge/                          → 동일한 머지 엔드포인트 재사용
 ```
 
 ## LLM 모델 사양
@@ -128,24 +138,89 @@ Ollama를 통해 양자화된(Q4) 모델을 사용합니다.
 |--------|----------|------|
 | POST | `/api/llm/query/{id}/clip/` | 인용된 영상 구간을 ffmpeg으로 클리핑 |
 | POST | `/api/llm/query/{id}/merge/` | 생성된 클립들을 하나의 mp4로 머지 |
+| POST | `/api/llm/manual-clip/` | 세그먼트 ID를 직접 지정하여 클립 생성 |
 
-**클립 요청 바디 (선택)**
+#### 클립 요청 바디 — `POST /api/llm/query/{id}/clip/`
 
 ```json
 {
   "aspect_ratio": "16:9",
-  "with_subtitles": true
+  "with_subtitles": true,
+  "with_title": false,
+  "title_position": "right",
+  "segment_offsets": [
+    { "citation_tag": "[S1]", "start_offset_sec": -2.0, "end_offset_sec": 1.5 }
+  ]
 }
 ```
 
 | 필드 | 기본값 | 설명 |
 |------|--------|------|
 | `aspect_ratio` | `null` (원본 유지) | `"16:9"` / `"9:16"` / `"1:1"` / `"4:3"` |
-| `with_subtitles` | `true` | 인용 transcript를 ASS 자막으로 클립에 삽입 |
+| `with_subtitles` | `true` | transcript를 ASS 자막으로 burn-in |
+| `with_title` | `false` | 강의 제목을 영상 상단에 텍스트 오버레이 |
+| `title_position` | `"right"` | 오버레이 위치: `"left"` / `"center"` / `"right"` |
+| `segment_offsets` | `[]` | 클립별 시작/종료 시간 미세 조정 (초 단위) |
 
-비율 변환이나 자막이 적용될 경우 libx264로 재인코딩되며, 둘 다 없을 때는 `-c copy`로 빠르게 처리됩니다.
+#### 머지 요청 바디 — `POST /api/llm/query/{id}/merge/`
 
+```json
+{
+  "selected_clips": ["clip1.mp4", "clip3.mp4", "clip2.mp4"]
+}
+```
+
+| 필드 | 기본값 | 설명 |
+|------|--------|------|
+| `selected_clips` | `null` (성공 클립 전체) | 머지할 클립 파일명 배열 (순서대로 머지) |
+
+#### 직접 선택 클립 — `POST /api/llm/manual-clip/`
+
+```json
+{
+  "segment_ids": [3924, 3925, 3930],
+  "aspect_ratio": "16:9",
+  "with_subtitles": true,
+  "with_title": true,
+  "title_position": "left"
+}
+```
+
+| 필드 | 기본값 | 설명 |
+|------|--------|------|
+| `segment_ids` | 필수 | 클립을 만들 `LectureSegment` ID 목록 (입력 순서대로 처리) |
+| `aspect_ratio` | `null` | 비율 변환 |
+| `with_subtitles` | `true` | 자막 burn-in |
+| `with_title` | `false` | 강의명 오버레이 |
+| `title_position` | `"right"` | 오버레이 위치 |
+
+응답으로 받은 `query_id`로 기존 `/api/llm/query/{id}/` 및 `/api/llm/query/{id}/merge/`를 동일하게 사용합니다.
+
+비율 변환이나 자막·오버레이가 적용될 경우 libx264로 재인코딩되며, 아무것도 없을 때는 `-c copy`로 빠르게 처리됩니다.  
 생성된 클립과 머지 파일은 `http://서버:8777/clips/{파일명}` 으로 직접 다운로드할 수 있습니다.
+
+## 강의 데이터 JSON 형식
+
+```json
+{
+  "title": "신경회로망특론 - 3. CS231_Lecture3",
+  "source_file": "3. CS231_Lecture3.mp4",
+  "description": "video | ko | 262 segments",
+  "segments": [
+    {
+      "start_time": "00:02",
+      "end_time": "00:28",
+      "transcript": "강의 내용 텍스트..."
+    }
+  ]
+}
+```
+
+float 초 단위 형식도 지원합니다.
+
+```json
+{"start": 748.454, "end": 777.682, "text": "강의 내용..."}
+```
 
 ## 외부에서 배치 업로드
 
@@ -182,18 +257,13 @@ SERVER = "http://서버IP:8777"
 
 for f in sorted(Path("./data").glob("*.json")):
     print(f"Uploading: {f.name}")
-    data = f.read_text(encoding="utf-8")
     resp = requests.post(
         f"{SERVER}/api/lectures/bulk-import/",
         headers={"Content-Type": "application/json"},
-        data=data,
+        data=f.read_text(encoding="utf-8"),
     )
     result = resp.json()
-    if resp.ok:
-        count = result.get("success", result.get("segments_count", "?"))
-        print(f"  OK — {count}")
-    else:
-        print(f"  FAIL — {result}")
+    print(f"  {'OK' if resp.ok else 'FAIL'} — {result.get('success', result)}")
 
 resp = requests.post(f"{SERVER}/api/llm/query/", json={
     "query_text": "인공지능과 머신러닝의 차이가 뭐야?",
@@ -204,7 +274,6 @@ query_id = resp.json()["query_id"]
 
 while True:
     r = requests.get(f"{SERVER}/api/llm/query/{query_id}/").json()
-    print(f"  status: {r['status']}")
     if r["status"] in ("completed", "failed"):
         break
     time.sleep(3)
@@ -238,65 +307,25 @@ services:
 ## 참고 영상 자동 생성 (Remotion)
 
 음성 파일과 세그먼트 메타데이터 JSON이 있을 때, Qwen2.5 14B로 씬 계획을 생성하고 Remotion으로 참고 영상을 만들 수 있습니다.
-
-### 입력 JSON 형식
-
-```json
-{
-  "title": "강의 제목",
-  "source_file": "/data/audios/lecture.mp3",
-  "segments": [
-    {
-      "start_time": "00:00",
-      "end_time": "00:23",
-      "transcript": "강의 내용 텍스트..."
-    }
-  ]
-}
-```
-
-세그먼트의 `start`/`end` (float 초 단위) 형식도 지원합니다.
-
-```json
-{"start": 748.454, "end": 777.682, "text": "강의 내용..."}
-```
+자세한 사용법은 [`utils/remotion-project/remotion.md`](utils/remotion-project/remotion.md)를 참고하세요.
 
 ### 영상 생성 명령 (컨테이너 내부)
 
 ```bash
-# 1. scene_plan.json 생성 + 오디오 추출 + 렌더링 (한 번에)
+# scene_plan.json 생성 + 오디오 추출 + 렌더링 (한 번에)
 docker compose exec web python utils/remotion_test.py \
   --input utils/test_audio.json \
   --output-dir /data/remotions \
   --output lecture_video.mp4 \
   --ollama-url http://ollama:11434
 
-# 2. scene_plan.json과 오디오 추출만 먼저 확인
+# scene_plan.json과 오디오 추출만 먼저 확인
 docker compose exec web python utils/remotion_test.py \
   --input utils/test_audio.json \
   --output-dir /data/remotions \
   --ollama-url http://ollama:11434 \
   --skip-render
-
-# 3. 원본 파일 경로를 직접 지정
-docker compose exec web python utils/remotion_test.py \
-  --input utils/test_audio.json \
-  --source-file /data/audios/test.mp3 \
-  --output-dir /data/remotions \
-  --ollama-url http://ollama:11434
 ```
-
-### 예시: test.mp3 + 메타데이터로 23초 영상 만들기
-
-```bash
-docker compose exec web python utils/remotion_test.py \
-  --input utils/test_audio.json \
-  --output-dir /data/remotions \
-  --output test_video.mp4 \
-  --ollama-url http://ollama:11434
-```
-
-완료되면 `/data/remotions/test_video.mp4` (호스트: `/media/mmlab/hdd/hbmun/remotions/test_video.mp4`)에 영상이 저장됩니다.
 
 ### 생성 파이프라인
 
@@ -307,15 +336,7 @@ input JSON
           └─→ [Remotion] 비주얼 씬 + 오디오 합성 → output.mp4
 ```
 
-| 파일 | 위치 |
-|------|------|
-| 씬 계획 | `/data/remotions/scene_plan.json` |
-| 추출 오디오 | `/app/utils/remotion-project/public/audio/segment_N.aac` |
-| 최종 영상 | `/data/remotions/output.mp4` |
-
 ### 디렉터리 마운트 설정
-
-`docker-compose.yml`에서 오디오 원본과 영상 출력 경로를 bind mount로 지정합니다.
 
 ```yaml
 services:
@@ -338,7 +359,7 @@ services:
 | 비동기 작업 | Celery + Redis |
 | LLM 서빙 | Ollama (NVIDIA GPU) |
 | 벡터 검색 | FAISS (CPU) + sentence-transformers |
-| 영상 처리 | ffmpeg (imageio-ffmpeg 정적 바이너리) |
+| 영상 처리 | ffmpeg (시스템 바이너리, drawtext 지원) |
 | 참고 영상 생성 | Remotion (Node.js 18, React) + Qwen2.5 14B |
 | 데이터베이스 | PostgreSQL 16 |
 | 리버스 프록시 | Nginx |
@@ -357,10 +378,10 @@ lectomlv-llm/
 │   │   ├── tasks.py                # FAISS 인덱싱 Celery 태스크
 │   │   └── urls.py
 │   ├── llm/                        # LLM 서비스
-│   │   ├── models.py               # LLMQuery
+│   │   ├── models.py               # LLMQuery (search/summary/recommend/manual_clip)
 │   │   ├── serializers.py
 │   │   ├── views.py
-│   │   ├── tasks.py                # LLM 추론 Celery 태스크
+│   │   ├── tasks.py                # LLM 추론 + 클립/머지 Celery 태스크
 │   │   ├── urls.py
 │   │   └── services/
 │   │       ├── ollama_client.py    # Ollama REST API 클라이언트
@@ -390,6 +411,7 @@ lectomlv-llm/
 │   ├── test_audio.json             # 테스트용 샘플 입력
 │   └── remotion-project/           # Remotion React 프로젝트
 │       ├── package.json
+│       ├── remotion.md             # Remotion 프로젝트 사용법
 │       ├── src/
 │       │   ├── index.tsx
 │       │   ├── Root.tsx

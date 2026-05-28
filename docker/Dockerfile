@@ -9,6 +9,8 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     fontconfig \
     fonts-wqy-microhei \
+    nodejs \
+    npm \
     && fc-cache -f \
     && rm -rf /var/lib/apt/lists/*
 
@@ -17,7 +19,9 @@ RUN pip install --upgrade pip && pip install -r requirements.txt
 
 COPY . .
 
-RUN mkdir -p /app/faiss_index /app/staticfiles /data/videos /data/clips
+RUN mkdir -p /app/faiss_index /app/staticfiles /data/videos /data/clips /data/audios /data/remotions
+
+RUN cd utils/remotion-project && npm install --no-fund --no-audit
 
 RUN python manage.py collectstatic --noinput 2>/dev/null || true
 

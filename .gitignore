@@ -208,3 +208,6 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+# Node.js (remotion-project) - Docker 빌드 시 npm install로 설치됨
+utils/remotion-project/node_modules/

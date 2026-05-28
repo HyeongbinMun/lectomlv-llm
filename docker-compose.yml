@@ -27,6 +27,8 @@ services:
       - static_data:/app/staticfiles
       - /media/mmlab/hdd/hbmun/videos:/data/videos:ro
       - /media/mmlab/hdd/hbmun/clips:/data/clips
+      - /media/mmlab/hdd/hbmun/audios:/data/audios:ro
+      - /media/mmlab/hdd/hbmun/remotions:/data/remotions
     depends_on:
       postgres:
         condition: service_healthy
@@ -49,6 +51,8 @@ services:
       - faiss_data:/app/faiss_index
       - /media/mmlab/hdd/hbmun/videos:/data/videos:ro
       - /media/mmlab/hdd/hbmun/clips:/data/clips
+      - /media/mmlab/hdd/hbmun/audios:/data/audios:ro
+      - /media/mmlab/hdd/hbmun/remotions:/data/remotions
     depends_on:
       postgres:
         condition: service_healthy

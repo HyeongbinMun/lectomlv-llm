@@ -1,0 +1,32 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+.env
+
+# Node.js - Docker 빌드 시 npm install로 설치됨
+utils/remotion-project/node_modules/
+
+# 테스트 / 캐시
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+htmlcov/
+.coverage
+
+# IDE
+.vscode/
+.idea/
+.cursorignore
+.cursorindexingignore
+
+# 로컬 데이터
+faiss_index/
+staticfiles/

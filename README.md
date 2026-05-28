@@ -235,6 +235,101 @@ services:
 
 컨테이너 내부 경로(`/data/videos`, `/data/clips`)는 `docker/.env`의 `VIDEO_SOURCE_DIR` / `VIDEO_CLIPS_DIR` 로 변경할 수 있습니다.
 
+## 참고 영상 자동 생성 (Remotion)
+
+음성 파일과 세그먼트 메타데이터 JSON이 있을 때, Qwen2.5 14B로 씬 계획을 생성하고 Remotion으로 참고 영상을 만들 수 있습니다.
+
+### 입력 JSON 형식
+
+```json
+{
+  "title": "강의 제목",
+  "source_file": "/data/audios/lecture.mp3",
+  "segments": [
+    {
+      "start_time": "00:00",
+      "end_time": "00:23",
+      "transcript": "강의 내용 텍스트..."
+    }
+  ]
+}
+```
+
+세그먼트의 `start`/`end` (float 초 단위) 형식도 지원합니다.
+
+```json
+{"start": 748.454, "end": 777.682, "text": "강의 내용..."}
+```
+
+### 영상 생성 명령 (컨테이너 내부)
+
+```bash
+# 1. scene_plan.json 생성 + 오디오 추출 + 렌더링 (한 번에)
+docker compose exec web python utils/remotion_test.py \
+  --input utils/test_audio.json \
+  --output-dir /data/remotions \
+  --output lecture_video.mp4 \
+  --ollama-url http://ollama:11434
+
+# 2. scene_plan.json과 오디오 추출만 먼저 확인
+docker compose exec web python utils/remotion_test.py \
+  --input utils/test_audio.json \
+  --output-dir /data/remotions \
+  --ollama-url http://ollama:11434 \
+  --skip-render
+
+# 3. 원본 파일 경로를 직접 지정
+docker compose exec web python utils/remotion_test.py \
+  --input utils/test_audio.json \
+  --source-file /data/audios/test.mp3 \
+  --output-dir /data/remotions \
+  --ollama-url http://ollama:11434
+```
+
+### 예시: test.mp3 + 메타데이터로 23초 영상 만들기
+
+```bash
+docker compose exec web python utils/remotion_test.py \
+  --input utils/test_audio.json \
+  --output-dir /data/remotions \
+  --output test_video.mp4 \
+  --ollama-url http://ollama:11434
+```
+
+완료되면 `/data/remotions/test_video.mp4` (호스트: `/media/mmlab/hdd/hbmun/remotions/test_video.mp4`)에 영상이 저장됩니다.
+
+### 생성 파이프라인
+
+```
+input JSON
+  └─→ [ffmpeg] 구간별 오디오 추출 → remotion-project/public/audio/segment_N.aac
+  └─→ [Qwen2.5 14B] 씬 계획 생성 → scene_plan.json
+          └─→ [Remotion] 비주얼 씬 + 오디오 합성 → output.mp4
+```
+
+| 파일 | 위치 |
+|------|------|
+| 씬 계획 | `/data/remotions/scene_plan.json` |
+| 추출 오디오 | `/app/utils/remotion-project/public/audio/segment_N.aac` |
+| 최종 영상 | `/data/remotions/output.mp4` |
+
+### 디렉터리 마운트 설정
+
+`docker-compose.yml`에서 오디오 원본과 영상 출력 경로를 bind mount로 지정합니다.
+
+```yaml
+services:
+  web:
+    volumes:
+      - /호스트/오디오/경로:/data/audios:ro
+      - /호스트/remotions/경로:/data/remotions
+
+  celery_worker:
+    volumes:
+      - /호스트/오디오/경로:/data/audios:ro
+      - /호스트/remotions/경로:/data/remotions
+```
+
 ## 기술 스택
 
 | 영역 | 기술 |
@@ -244,6 +339,7 @@ services:
 | LLM 서빙 | Ollama (NVIDIA GPU) |
 | 벡터 검색 | FAISS (CPU) + sentence-transformers |
 | 영상 처리 | ffmpeg (imageio-ffmpeg 정적 바이너리) |
+| 참고 영상 생성 | Remotion (Node.js 18, React) + Qwen2.5 14B |
 | 데이터베이스 | PostgreSQL 16 |
 | 리버스 프록시 | Nginx |
 | 컨테이너 | Docker Compose (NVIDIA runtime) |
@@ -289,6 +385,18 @@ lectomlv-llm/
 │   ├── nginx.conf
 │   ├── requirements.txt
 │   └── .env.example
+├── utils/
+│   ├── remotion_test.py            # 오디오+메타데이터 → Remotion 영상 생성 스크립트
+│   ├── test_audio.json             # 테스트용 샘플 입력
+│   └── remotion-project/           # Remotion React 프로젝트
+│       ├── package.json
+│       ├── src/
+│       │   ├── index.tsx
+│       │   ├── Root.tsx
+│       │   ├── LectureVideo.tsx    # Series로 씬 순서 배치
+│       │   ├── Scene.tsx           # TitleCard / BulletList / Quote + Audio
+│       │   └── types.ts
+│       └── public/audio/           # ffmpeg 추출 오디오 (자동 생성)
 ├── docker-compose.yml
 ├── manage.py
 └── README.md
